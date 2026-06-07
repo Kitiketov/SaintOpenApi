@@ -1,0 +1,33 @@
+[project]
+name = "SaintOpenApi"
+version = "0.0.1"
+description = ""
+authors = [
+    {name = "Илья Котов",email = "roskets801@gmail.com"},
+    {name = "Екатерина Толканюк",email = "2006tka@gmail.com"}
+]
+dependencies = [
+    "aiogram>=3.28.2",
+    "black>=26.5.1",
+    "fastapi>=0.136.3",
+    "flake8>=7.3.0",
+    "mypy>=1.20.2",
+    "punq>=0.7.0",
+    "pydantic>=2.13.4",
+    "pydantic-settings>=2.14.1",
+    "uvicorn>=0.49.0",
+]
+[tool.poetry.dependencies]
+python = ">=3.12, <3.14"
+fastapi = "^0.136.0"
+uvicorn = "^0.44.0"
+[dependency-groups]
+dev = [
+    "black (>=26.3.1,<27.0.0)",
+    "mypy (>=1.20.1,<2.0.0)"
+]
+
+[tool.black]
+line-length = 120
+target-version = ['py312']
+skip-string-normalization = true
