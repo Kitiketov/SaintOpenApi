@@ -6,6 +6,9 @@ class Settings(BaseSettings):
     bot_token: str = ""
     chat_id: int | None = Field(default=None, alias="CHAT_ID")
     admin_id: int
+    rate_limit_delay: float = 0.05
+    api_port: int = 8090
+    api_host: str = "0.0.0.0"
 
     @field_validator("chat_id", mode="before")
     def _normalize_chat_id(cls, v):

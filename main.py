@@ -1,27 +1,32 @@
 import asyncio
 
 import uvicorn
-from aiogram import Bot
 
+from config.logger import setup_logging
+from config.settings import Settings
+from di.container import init_container
 from infrastructure.db import db
-from infrastructure.settings import settings
 from presentation.fastapi.app import create_api_app
 
 
 async def main() -> None:
     await db.start_db()
-    #bot = Bot(settings.bot_token)
+    # bot = Bot(config.bot_token)
     # session = await create_http_session()
     # moderation_client = ModerationClient(
-    #     base_url=str(settings.api_base),
+    #     base_url=str(config.api_base),
     #     session=session,
     # )
+    setup_logging()
+    settings = Settings()
+    container = init_container(settings)
     app = create_api_app()
-    
+    app.state.container = container
+
     config = uvicorn.Config(
         app=app,
-        host=settings.notify_host,
-        port=settings.notify_port,
+        host=settings.api_host,
+        port=settings.api_port,
         log_level="info",
     )
     server = uvicorn.Server(config)
@@ -31,8 +36,8 @@ async def main() -> None:
         pass
     #     await run_bot(bot, moderation_client)
     finally:
-    #     server.should_exit = True
-         await api_task
+        #     server.should_exit = True
+        await api_task
     #     await session.close()
     #     await bot.session.close()
 

@@ -1,11 +1,10 @@
 from aiogram import Bot
 from fastapi import FastAPI
 
-from src.api.routes.notify import router as notify_router
+from src.presentation.fastapi.routes.example import router as example_router
 
 
-def create_api_app(bot: Bot) -> FastAPI:
-    app = FastAPI()
-    app.state.bot = bot
-    app.include_router(notify_router, prefix="/api/moderation", tags=["moderation"])
+def create_api_app() -> FastAPI:
+    app = FastAPI(title="SaintBot API",docs_url="/docs")
+    app.include_router(example_router, prefix="/api", tags=["example"])
     return app
