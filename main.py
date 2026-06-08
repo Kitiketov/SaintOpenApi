@@ -5,13 +5,11 @@ import uvicorn
 from src.config.logger import setup_logging
 from src.config.settings import Settings
 from src.di.container import init_container
-from src.infrastructure.db import db
 from src.infrastructure.repositories.interfaces.ISaintRepository import ISaintRepository
 from src.presentation.fastapi.app import create_api_app
 
 
 async def main() -> None:
-    await db.start_db()
     # bot = Bot(config.bot_token)
     # session = await create_http_session()
     # moderation_client = ModerationClient(
