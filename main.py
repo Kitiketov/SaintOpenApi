@@ -2,11 +2,12 @@ import asyncio
 
 import uvicorn
 
-from config.logger import setup_logging
-from config.settings import Settings
-from di.container import init_container
-from infrastructure.db import db
-from presentation.fastapi.app import create_api_app
+from src.config.logger import setup_logging
+from src.config.settings import Settings
+from src.di.container import init_container
+from src.infrastructure.db import db
+from src.infrastructure.repositories.interfaces.ISaintRepository import ISaintRepository
+from src.presentation.fastapi.app import create_api_app
 
 
 async def main() -> None:
@@ -20,6 +21,8 @@ async def main() -> None:
     setup_logging()
     settings = Settings()
     container = init_container(settings)
+    saint_repo = container.resolve(ISaintRepository)
+    await saint_repo.start_db()
     app = create_api_app()
     app.state.container = container
 

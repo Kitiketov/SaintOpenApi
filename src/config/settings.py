@@ -10,6 +10,13 @@ class Settings(BaseSettings):
     api_port: int = 8090
     api_host: str = "0.0.0.0"
 
+
+    db_path: str = "database.db"
+
+    room_default_price: str = "не установлен"
+    room_default_event_time: str = "не установлено"
+    room_default_exchange_type: str = "централизованый"
+
     @field_validator("chat_id", mode="before")
     def _normalize_chat_id(cls, v):
         if v is None:

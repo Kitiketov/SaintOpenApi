@@ -1,4 +1,4 @@
-import abc
+from abc import ABC, abstractmethod
 
 from fastapi import APIRouter, Request, Depends
 
@@ -6,8 +6,8 @@ from presentation.fastapi.dependencies import get_service
 from presentation.fastapi.schemas.example import ExampleRequest, ExampleResponse
 
 
-class IExampleRepository(abc.ABC):
-    @abc.abstractmethod
+class IExampleRepository(ABC):
+    @abstractmethod
     async def get_user(self, user_id: int) -> bool:
         pass
 
