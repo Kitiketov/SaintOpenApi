@@ -8,7 +8,7 @@ API_URL = "http://127.0.0.1:8000/api/rooms"
 
 async def http_prepare_room(user: User) -> None:
     async with httpx.AsyncClient() as client:
-        response = await client.post(f"{API_URL}/prepare", json={"user": user})
+        response = await client.post(f"{API_URL}/prepare", json={"user": user.model_dump()})
 
         if response.status_code == 400:
             raise APITooManyRooms()
@@ -16,7 +16,7 @@ async def http_prepare_room(user: User) -> None:
         try:
             response.raise_for_status()
         except httpx.HTTPStatusError as e:
-            raise APIError(str(e)) from e
+            raise APIError(response.status_code, str(e)) from e
 
 
 async def http_create_room(room_name: str, user_id: int) -> str:
@@ -29,5 +29,5 @@ async def http_create_room(room_name: str, user_id: int) -> str:
         try:
             response.raise_for_status()
         except httpx.HTTPStatusError as e:
-            raise APIError(str(e)) from e
+            raise APIError(response.status_code, str(e)) from e
         return response.json().get("room_id")

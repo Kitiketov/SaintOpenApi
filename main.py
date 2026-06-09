@@ -2,11 +2,11 @@ import asyncio
 
 import uvicorn
 
-from src.config.logger import setup_logging
-from src.config.settings import Settings
-from src.di.container import init_container
-from src.infrastructure.repositories.interfaces.ISaintRepository import ISaintRepository
-from src.presentation.fastapi.app import create_api_app
+from config.logger import setup_logging
+from config.settings import Settings
+from di.container import init_container
+from infrastructure.repositories.interfaces.ISaintRepository import ISaintRepository
+from presentation.fastapi.app import create_api_app
 
 
 async def main() -> None:

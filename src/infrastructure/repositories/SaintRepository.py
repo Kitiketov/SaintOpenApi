@@ -4,7 +4,7 @@ import sqlite3
 from typing import Any, AsyncGenerator
 
 from infrastructure.repositories.interfaces.ISaintRepository import ISaintRepository
-from src.config.settings import Settings
+from config.settings import Settings
 
 
 class SqliteSaintRepository(ISaintRepository):
