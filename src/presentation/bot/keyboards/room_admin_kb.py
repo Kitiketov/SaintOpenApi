@@ -175,9 +175,7 @@ async def member_kb(members, room_iden):
         builder.adjust(1)
     builder.button(
         text="🚫Отмена",
-        callback_data=states.CallbackFactory(
-            action=CallbackAction.CANCEL, room_iden=room_iden, asAdmin=True
-        ).pack(),
+        callback_data=states.CallbackFactory(action=CallbackAction.CANCEL, room_iden=room_iden, asAdmin=True).pack(),
     )
     builder.adjust(1)
     return builder.as_markup()

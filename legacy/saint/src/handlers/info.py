@@ -4,7 +4,6 @@ from aiogram.types import Message
 
 from src.texts import messages
 
-
 router = Router(name=__name__)
 
 

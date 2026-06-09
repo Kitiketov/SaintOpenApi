@@ -1,5 +1,6 @@
 import logging
 
+
 def setup_logging() -> None:
     """Инициализация базовых настроек логирования для всего проекта"""
     logging.basicConfig(

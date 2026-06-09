@@ -8,7 +8,7 @@ from infrastructure.repositories.interfaces import ISaintRepository
 from presentation.fastapi.dependencies import get_service
 from presentation.fastapi.schemas.room import PreparePayload, CreatePayload
 
-
+#todo: ощущение, что здесь будет дофига кода и надо бы это в отдельный файл скинуть типо в core, хз?
 class IRoomRepository(ABC):
     @abstractmethod
     async def prepare_create_room(self, user: User) -> None:
@@ -17,6 +17,7 @@ class IRoomRepository(ABC):
     @abstractmethod
     async def create_new_room(self, room_name: str, user_id: int) -> str:
         pass
+
 
 class RoomRepository(IRoomRepository):
     def __init__(self, saint_repo: ISaintRepository):
@@ -43,9 +44,8 @@ router = APIRouter(prefix="rooms")
 
 
 @router.post("/prepare")
-async def api_prepare_room(payload: PreparePayload,
-                           request: Request,
-                           room_repo: IRoomRepository = Depends(get_service(IRoomRepository))
+async def api_prepare_room(
+    payload: PreparePayload, request: Request, room_repo: IRoomRepository = Depends(get_service(IRoomRepository))
 ):
     try:
         await room_repo.prepare_create_room(payload.user)
@@ -53,10 +53,10 @@ async def api_prepare_room(payload: PreparePayload,
     except TooManyRoomsException:
         raise HTTPException(status_code=400, detail="Too many rooms")
 
+
 @router.post("/create")
-async def api_create_room(payload: CreatePayload,
-                          request: Request,
-                          room_repo: IRoomRepository = Depends(get_service(IRoomRepository))
+async def api_create_room(
+    payload: CreatePayload, request: Request, room_repo: IRoomRepository = Depends(get_service(IRoomRepository))
 ):
     try:
         room_id = await room_repo.create_new_room(payload.room_name, payload.user_id)

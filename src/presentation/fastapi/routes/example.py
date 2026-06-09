@@ -22,10 +22,13 @@ router = APIRouter()
 
 
 @router.post("/example")
-async def example(payload: ExampleRequest, request: Request,
-                  example_repo: IExampleRepository = Depends(get_service(IExampleRepository))) -> ExampleResponse:
+async def example(
+    payload: ExampleRequest,
+    request: Request,
+    example_repo: IExampleRepository = Depends(get_service(IExampleRepository)),
+) -> ExampleResponse:
     """
-        EXXXAAAAMMMPPPLEEE
+    EXXXAAAAMMMPPPLEEE
     """
     status = await example_repo.get_user(payload.id)
 

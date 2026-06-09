@@ -10,7 +10,6 @@ class Settings(BaseSettings):
     api_port: int = 8090
     api_host: str = "0.0.0.0"
 
-
     db_path: str = "database.db"
 
     room_default_price: str = "не установлен"

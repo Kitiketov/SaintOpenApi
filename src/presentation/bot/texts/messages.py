@@ -49,17 +49,11 @@ def event_not_started(room_name: str) -> str:
 
 
 def admin_not_member_start(room_name: str) -> str:
-    return (
-        f"Вы пока не участник комнаты {room_name}.\n"
-        "Добавить себя и участвовать в обмене или начать без вас?"
-    )
+    return f"Вы пока не участник комнаты {room_name}.\n" "Добавить себя и участвовать в обмене или начать без вас?"
 
 
 def event_started_before_join(room_name: str) -> str:
-    return (
-        f"Событие в комнате {room_name} началось раньше вашего присоединения\n"
-        "Вы не были распределены"
-    )
+    return f"Событие в комнате {room_name} началось раньше вашего присоединения\n" "Вы не были распределены"
 
 
 def gift_target(user_info: str) -> str:
@@ -148,6 +142,7 @@ def event_started(room_name: str) -> str:
 def event_started_notify(room_name: str) -> str:
     return f"Событие в комнате {room_name} началось\nПроверте кому вы дарите"
 
+
 def remind_notify(room_name: str) -> str:
     return (
         f"🔔 Напоминание: событие в комнате {room_name} уже идёт.\n"
@@ -164,10 +159,7 @@ def invitation_text(room_name: str) -> str:
 
 
 def prompt_custom_invitation(room_name: str) -> str:
-    return (
-        f"Отправьте текст приглашения для комнаты <code>{room_name}</code>\n"
-        "Можно добавить одно фото без альбома"
-    )
+    return f"Отправьте текст приглашения для комнаты <code>{room_name}</code>\n" "Можно добавить одно фото без альбома"
 
 
 def invitation_too_long() -> str:
@@ -184,6 +176,7 @@ def room_not_exists_retry() -> str:
 
 def id_info(user_id: int, chat_id: int) -> str:
     return f"ID: user_id - {user_id}\n      chat_id - {chat_id}"
+
 
 def about_santa():
     return (

@@ -47,8 +47,9 @@ def is_valid_name(name) -> bool:
         "{",
         "}",
     ]
-    return True if (
-                all([a not in name for a in disvalid]) and name[0] not in "0123456789" and len(name) <= 30) else False
+    return (
+        True if (all([a not in name for a in disvalid]) and name[0] not in "0123456789" and len(name) <= 30) else False
+    )
 
 
 async def start_db():
@@ -65,8 +66,7 @@ async def start_db():
     cur.execute(
         "CREATE TABLE IF NOT EXISTS users(tg_id INTEGER PRIMARY KEY,first_name TEXT,last_name TEXT,username TEXT)"
     )
-    cur.execute(
-        """
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS user_rooms(
             tg_id INTEGER,
             room_iden TEXT,
@@ -74,8 +74,7 @@ async def start_db():
             is_admin BOOLEAN DEFAULT FALSE,
             PRIMARY KEY (tg_id, room_iden)
         )
-        """
-    )
+        """)
     await migrate_rooms_table()
     db.commit()
 
@@ -85,22 +84,14 @@ async def create_room(room_name, user_id):
         while True:
             room_id = f"{random.randint(1, 9999):04}"
             room_iden = f"{room_name}{room_id}"
-            _room_iden = cur.execute(
-                "SELECT 1 FROM rooms WHERE room_iden = ?", (room_iden,)
-            ).fetchone()
+            _room_iden = cur.execute("SELECT 1 FROM rooms WHERE room_iden = ?", (room_iden,)).fetchone()
             if not _room_iden:
                 break
         member_table_name = f"{room_iden}_mem"
         saint_table_name = f"{room_iden}_saint"
-        cur.execute(
-            "INSERT INTO rooms (room_iden,admin) VALUES (?, ?)", (room_iden, user_id)
-        )
-        cur.execute(
-            f"CREATE TABLE {member_table_name} (user_id INTEGER PRIMARY KEY, wishes TEXT, photo_id TEXT)"
-        )
-        cur.execute(
-            f"CREATE TABLE {saint_table_name} (saint_user_id INTEGER PRIMARY KEY,reciver_user_id INTEGER)"
-        )
+        cur.execute("INSERT INTO rooms (room_iden,admin) VALUES (?, ?)", (room_iden, user_id))
+        cur.execute(f"CREATE TABLE {member_table_name} (user_id INTEGER PRIMARY KEY, wishes TEXT, photo_id TEXT)")
+        cur.execute(f"CREATE TABLE {saint_table_name} (saint_user_id INTEGER PRIMARY KEY,reciver_user_id INTEGER)")
 
         cur.execute(
             "INSERT OR IGNORE INTO user_rooms (tg_id, room_iden) VALUES (?, ?)",
@@ -139,21 +130,15 @@ async def connect2room(raw_data, user_id):
     room_name, room_id, *_ = raw_data.split(":")
     room_iden = f"{room_name}{room_id}"
     table_name = f"{room_iden}_mem"
-    _room = cur.execute(
-        "SELECT * FROM rooms WHERE room_iden = ?", (room_iden,)
-    ).fetchone()
+    _room = cur.execute("SELECT * FROM rooms WHERE room_iden = ?", (room_iden,)).fetchone()
     if not _room or not is_valid_name(room_name):
         return "room_error"
     if _room[1] == True:
         return "joined late"
-    _user = cur.execute(
-        f"SELECT * FROM {table_name} WHERE user_id = ?", (user_id,)
-    ).fetchone()
+    _user = cur.execute(f"SELECT * FROM {table_name} WHERE user_id = ?", (user_id,)).fetchone()
     if _user:
         return "user_error"
-    cur.execute(
-        f"INSERT INTO {table_name} (user_id,wishes) VALUES (?, '-')", (user_id,)
-    )
+    cur.execute(f"INSERT INTO {table_name} (user_id,wishes) VALUES (?, '-')", (user_id,))
 
     _room = cur.execute(
         "SELECT * FROM user_rooms WHERE tg_id = ? AND room_iden = ?",
@@ -175,23 +160,17 @@ async def connect2room(raw_data, user_id):
 
 
 async def get_members_list(room_iden):
-    admin_raw = cur.execute(
-        "SELECT * FROM rooms WHERE room_iden = ?", (room_iden,)
-    ).fetchone()
+    admin_raw = cur.execute("SELECT * FROM rooms WHERE room_iden = ?", (room_iden,)).fetchone()
     admin_id = admin_raw[2]
     isAdminMember = False
 
     member_id_list = cur.execute(f"SELECT * FROM {room_iden}_mem ").fetchall()
-    admin = member = cur.execute(
-        "SELECT * FROM users WHERE tg_id = ?", (admin_id,)
-    ).fetchone()
+    admin = member = cur.execute("SELECT * FROM users WHERE tg_id = ?", (admin_id,)).fetchone()
 
     member_list = []
     for member_id in member_id_list:
         if member_id[0] != admin_id:
-            member = cur.execute(
-                "SELECT * FROM users WHERE tg_id = ?", (member_id[0],)
-            ).fetchone()
+            member = cur.execute("SELECT * FROM users WHERE tg_id = ?", (member_id[0],)).fetchone()
             member_list.append(member)
         else:
             isAdminMember = True
@@ -264,18 +243,14 @@ async def start_event(room_iden):
 
 async def who_gives(room_iden, user_id):
     table_name = f"{room_iden}_saint"
-    pair = cur.execute(
-        f"SELECT * FROM {table_name} WHERE saint_user_id = ?", (user_id,)
-    ).fetchone()
+    pair = cur.execute(f"SELECT * FROM {table_name} WHERE saint_user_id = ?", (user_id,)).fetchone()
     if not pair:
         return "JOINED LATE"
     return pair[1]
 
 
 async def isStarted(room_iden):
-    room_raw = cur.execute(
-        "SELECT * FROM rooms WHERE room_iden = ?", (room_iden,)
-    ).fetchone()
+    room_raw = cur.execute("SELECT * FROM rooms WHERE room_iden = ?", (room_iden,)).fetchone()
     return room_raw[1]
 
 
@@ -284,15 +259,11 @@ async def get_user(user_id):
 
 
 async def check_room_and_member(user_id, room_iden):
-    _room = cur.execute(
-        "SELECT * FROM rooms WHERE room_iden = ?", (room_iden,)
-    ).fetchone()
+    _room = cur.execute("SELECT * FROM rooms WHERE room_iden = ?", (room_iden,)).fetchone()
     if not _room:
         return "ROOM NOT EXISTS"
     table_name = f"{room_iden}_mem"
-    _user = cur.execute(
-        f"SELECT * FROM {table_name} WHERE user_id = ?", (user_id,)
-    ).fetchone()
+    _user = cur.execute(f"SELECT * FROM {table_name} WHERE user_id = ?", (user_id,)).fetchone()
     if not _user and _room[2] == user_id:
         return "IS ADMIN"
     if not _user:
@@ -301,9 +272,7 @@ async def check_room_and_member(user_id, room_iden):
 
 
 async def get_room_admin(room_iden):
-    admin_raw = cur.execute(
-        "SELECT admin FROM rooms WHERE room_iden = ?", (room_iden,)
-    ).fetchone()
+    admin_raw = cur.execute("SELECT admin FROM rooms WHERE room_iden = ?", (room_iden,)).fetchone()
     if not admin_raw:
         return None
     return admin_raw[0]
@@ -318,15 +287,11 @@ async def count_user_room(user_id):
 
 
 async def get_wishes_and_photo(room_iden, user_id):
-    _room = cur.execute(
-        "SELECT * FROM rooms WHERE room_iden = ?", (room_iden,)
-    ).fetchone()
+    _room = cur.execute("SELECT * FROM rooms WHERE room_iden = ?", (room_iden,)).fetchone()
     if not _room:
         return "ROOM NOT EXISTS", None, None
     table_name = f"{room_iden}_mem"
-    _user = cur.execute(
-        f"SELECT * FROM {table_name} WHERE user_id = ?", (user_id,)
-    ).fetchone()
+    _user = cur.execute(f"SELECT * FROM {table_name} WHERE user_id = ?", (user_id,)).fetchone()
     if not _user:
         return "MEMBER NOT EXISTS", None, None
     _, wishes, photo_id = _user
@@ -342,9 +307,7 @@ async def edit_wishes(wishes, user_id, room_iden, photo_id=""):
         return "ROOM NOT EXISTS"
 
     table_name = f"{room_iden}_mem"
-    _user = cur.execute(
-        f"SELECT * FROM {table_name} WHERE user_id = ?", (user_id,)
-    ).fetchone()
+    _user = cur.execute(f"SELECT * FROM {table_name} WHERE user_id = ?", (user_id,)).fetchone()
     if not _user:
         return "MEMBER NOT EXISTS"
 
@@ -358,9 +321,7 @@ async def edit_wishes(wishes, user_id, room_iden, photo_id=""):
 
 
 async def migrate_rooms_table():
-    columns = [
-        column[1] for column in cur.execute("PRAGMA table_info(rooms)").fetchall()
-    ]
+    columns = [column[1] for column in cur.execute("PRAGMA table_info(rooms)").fetchall()]
     migrations = [
         (
             "gift_price_range",
@@ -423,13 +384,9 @@ async def update_room_settings(room_iden, price=None, event_time=None, exchange_
 
 async def get_stats():
     total_users_raw = cur.execute("SELECT COUNT(*) FROM users").fetchone()
-    participants_raw = cur.execute(
-        "SELECT COUNT(DISTINCT tg_id) FROM user_rooms WHERE is_member = TRUE"
-    ).fetchone()
+    participants_raw = cur.execute("SELECT COUNT(DISTINCT tg_id) FROM user_rooms WHERE is_member = TRUE").fetchone()
     rooms_total_raw = cur.execute("SELECT COUNT(*) FROM rooms").fetchone()
-    started_rooms_raw = cur.execute(
-        "SELECT COUNT(*) FROM rooms WHERE status = TRUE"
-    ).fetchone()
+    started_rooms_raw = cur.execute("SELECT COUNT(*) FROM rooms WHERE status = TRUE").fetchone()
 
     total_users = total_users_raw[0] if total_users_raw else 0
     participants = participants_raw[0] if participants_raw else 0
@@ -438,10 +395,12 @@ async def get_stats():
 
     return total_users, participants, rooms_total, started_rooms
 
+
 def get_all_users():
     raw_users = cur.execute("SELECT DISTINCT tg_id FROM users").fetchall()
     for user_id in raw_users:
         yield user_id[0]
+
 
 if __name__ == "__main__":
     asyncio.run(start_db())

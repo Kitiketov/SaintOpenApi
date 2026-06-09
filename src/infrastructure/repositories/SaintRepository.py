@@ -13,8 +13,40 @@ class SqliteSaintRepository(ISaintRepository):
         self.conn = sqlite3.connect(settings.db_path, check_same_thread=False)
 
     def _is_valid_name(self, name: str) -> bool:
-        forbidden = ["_saint", "_mem", "\\", ".", "/", ",", ":", ";", "'", '"', " ", "*", "+", "-", "#", "@", "$", "%",
-                     "^", "!", "~", "`", "&", "|", "<", ">", "[", "]", "(", ")", "{", "}"]
+        forbidden = [
+            "_saint",
+            "_mem",
+            "\\",
+            ".",
+            "/",
+            ",",
+            ":",
+            ";",
+            "'",
+            '"',
+            " ",
+            "*",
+            "+",
+            "-",
+            "#",
+            "@",
+            "$",
+            "%",
+            "^",
+            "!",
+            "~",
+            "`",
+            "&",
+            "|",
+            "<",
+            ">",
+            "[",
+            "]",
+            "(",
+            ")",
+            "{",
+            "}",
+        ]
         return all(char not in name for char in forbidden) and not name[0].isdigit() and len(name) <= 30
 
     async def start_db(self) -> None:
@@ -29,7 +61,8 @@ class SqliteSaintRepository(ISaintRepository):
                 ")"
             )
             cur.execute(
-                "CREATE TABLE IF NOT EXISTS users(tg_id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT, username TEXT)")
+                "CREATE TABLE IF NOT EXISTS users(tg_id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT, username TEXT)"
+            )
             cur.execute(
                 "CREATE TABLE IF NOT EXISTS user_rooms("
                 "tg_id INTEGER, room_iden TEXT, is_member BOOLEAN DEFAULT FALSE, is_admin BOOLEAN DEFAULT FALSE, "
@@ -66,8 +99,10 @@ class SqliteSaintRepository(ISaintRepository):
         def _ops():
             cur = self.conn.cursor()
             if not cur.execute("SELECT * FROM users WHERE tg_id = ?", (user.id,)).fetchone():
-                cur.execute("INSERT INTO users (tg_id, first_name, last_name, username) VALUES (?, ?, ?, ?)",
-                            (user.id, user.first_name, user.last_name, user.username))
+                cur.execute(
+                    "INSERT INTO users (tg_id, first_name, last_name, username) VALUES (?, ?, ?, ?)",
+                    (user.id, user.first_name, user.last_name, user.username),
+                )
                 self.conn.commit()
 
         await asyncio.to_thread(_ops)
@@ -77,8 +112,10 @@ class SqliteSaintRepository(ISaintRepository):
 
         def _ops():
             cur = self.conn.cursor()
-            cur.execute("UPDATE users SET first_name = ?, last_name = ?, username = ? WHERE tg_id = ?",
-                        (user.first_name, user.last_name, user.username, user.id))
+            cur.execute(
+                "UPDATE users SET first_name = ?, last_name = ?, username = ? WHERE tg_id = ?",
+                (user.first_name, user.last_name, user.username, user.id),
+            )
             self.conn.commit()
 
         await asyncio.to_thread(_ops)
@@ -101,13 +138,17 @@ class SqliteSaintRepository(ISaintRepository):
 
             cur.execute(f"INSERT INTO {room_iden}_mem (user_id, wishes) VALUES (?, '-')", (user_id,))
 
-            if not cur.execute("SELECT * FROM user_rooms WHERE tg_id = ? AND room_iden = ?",
-                               (user_id, room_iden)).fetchone():
-                cur.execute("INSERT INTO user_rooms (tg_id, room_iden, is_member, is_admin) VALUES (?, ?, TRUE, FALSE)",
-                            (user_id, room_iden))
+            if not cur.execute(
+                "SELECT * FROM user_rooms WHERE tg_id = ? AND room_iden = ?", (user_id, room_iden)
+            ).fetchone():
+                cur.execute(
+                    "INSERT INTO user_rooms (tg_id, room_iden, is_member, is_admin) VALUES (?, ?, TRUE, FALSE)",
+                    (user_id, room_iden),
+                )
             else:
-                cur.execute("UPDATE user_rooms SET is_member = TRUE WHERE tg_id = ? AND room_iden = ?",
-                            (user_id, room_iden))
+                cur.execute(
+                    "UPDATE user_rooms SET is_member = TRUE WHERE tg_id = ? AND room_iden = ?", (user_id, room_iden)
+                )
             self.conn.commit()
             return True
 
@@ -137,11 +178,13 @@ class SqliteSaintRepository(ISaintRepository):
         def _ops():
             cur = self.conn.cursor()
             cur.execute(f"DELETE FROM {room_iden}_mem WHERE user_id = ?", (user_id,))
-            cur.execute("UPDATE user_rooms SET is_member = FALSE WHERE tg_id = ? AND room_iden = ?",
-                        (user_id, room_iden))
+            cur.execute(
+                "UPDATE user_rooms SET is_member = FALSE WHERE tg_id = ? AND room_iden = ?", (user_id, room_iden)
+            )
             cur.execute(
                 "DELETE FROM user_rooms WHERE tg_id = ? AND room_iden = ? AND is_member = FALSE AND is_admin = FALSE",
-                (user_id, room_iden))
+                (user_id, room_iden),
+            )
             self.conn.commit()
 
         await asyncio.to_thread(_ops)
@@ -150,8 +193,9 @@ class SqliteSaintRepository(ISaintRepository):
         def _ops():
             cur = self.conn.cursor()
             flag = "is_admin" if as_admin else "is_member"
-            rooms = cur.execute(f"SELECT room_iden FROM user_rooms WHERE tg_id = ? AND {flag} = TRUE",
-                                (user_id,)).fetchall()
+            rooms = cur.execute(
+                f"SELECT room_iden FROM user_rooms WHERE tg_id = ? AND {flag} = TRUE", (user_id,)
+            ).fetchall()
             return [r[0] for r in rooms]
 
         return await asyncio.to_thread(_ops)
@@ -174,8 +218,9 @@ class SqliteSaintRepository(ISaintRepository):
         def _ops():
             cur = self.conn.cursor()
             for giver, receiver in pairs.items():
-                cur.execute(f"INSERT INTO {room_iden}_saint (saint_user_id, reciver_user_id) VALUES (?, ?)",
-                            (giver, receiver))
+                cur.execute(
+                    f"INSERT INTO {room_iden}_saint (saint_user_id, reciver_user_id) VALUES (?, ?)", (giver, receiver)
+                )
             self.conn.commit()
 
         await asyncio.to_thread(_ops)
@@ -191,8 +236,9 @@ class SqliteSaintRepository(ISaintRepository):
     async def who_gives(self, room_iden: str, user_id: int) -> int | str:
         def _ops():
             cur = self.conn.cursor()
-            pair = cur.execute(f"SELECT reciver_user_id FROM {room_iden}_saint WHERE saint_user_id = ?",
-                               (user_id,)).fetchone()
+            pair = cur.execute(
+                f"SELECT reciver_user_id FROM {room_iden}_saint WHERE saint_user_id = ?", (user_id,)
+            ).fetchone()
             return pair[0] if pair else "JOINED LATE"
 
         return await asyncio.to_thread(_ops)
@@ -207,7 +253,8 @@ class SqliteSaintRepository(ISaintRepository):
 
     async def get_user(self, user_id: int) -> Any | None:
         return await asyncio.to_thread(
-            lambda: self.conn.cursor().execute("SELECT * FROM users WHERE tg_id = ?", (user_id,)).fetchone())
+            lambda: self.conn.cursor().execute("SELECT * FROM users WHERE tg_id = ?", (user_id,)).fetchone()
+        )
 
     async def check_room_and_member(self, user_id: int, room_iden: str) -> str | bool:
         def _ops():
@@ -257,8 +304,9 @@ class SqliteSaintRepository(ISaintRepository):
                 return "ROOM NOT EXISTS"
             if not cur.execute(f"SELECT 1 FROM {room_iden}_mem WHERE user_id = ?", (user_id,)).fetchone():
                 return "MEMBER NOT EXISTS"
-            cur.execute(f"UPDATE {room_iden}_mem SET wishes = ?, photo_id = ? WHERE user_id = ?",
-                        (wishes, photo_id, user_id))
+            cur.execute(
+                f"UPDATE {room_iden}_mem SET wishes = ?, photo_id = ? WHERE user_id = ?", (wishes, photo_id, user_id)
+            )
             self.conn.commit()
             return True
 
@@ -269,12 +317,18 @@ class SqliteSaintRepository(ISaintRepository):
             cur = self.conn.cursor()
             columns = [col[1] for col in cur.execute("PRAGMA table_info(rooms)").fetchall()]
             migrations = [
-                ("gift_price_range",
-                 f"ALTER TABLE rooms ADD COLUMN gift_price_range TEXT DEFAULT '{self.settings.room_default_price}'"),
-                ("event_time",
-                 f"ALTER TABLE rooms ADD COLUMN event_time TEXT DEFAULT '{self.settings.room_default_event_time}'"),
-                ("exchange_type",
-                 f"ALTER TABLE rooms ADD COLUMN exchange_type TEXT DEFAULT '{self.settings.room_default_exchange_type}'"),
+                (
+                    "gift_price_range",
+                    f"ALTER TABLE rooms ADD COLUMN gift_price_range TEXT DEFAULT '{self.settings.room_default_price}'",
+                ),
+                (
+                    "event_time",
+                    f"ALTER TABLE rooms ADD COLUMN event_time TEXT DEFAULT '{self.settings.room_default_event_time}'",
+                ),
+                (
+                    "exchange_type",
+                    f"ALTER TABLE rooms ADD COLUMN exchange_type TEXT DEFAULT '{self.settings.room_default_exchange_type}'",
+                ),
             ]
             for column, query in migrations:
                 if column not in columns:
@@ -285,17 +339,22 @@ class SqliteSaintRepository(ISaintRepository):
 
     async def get_room_settings(self, room_iden: str) -> tuple[str | bool, str | None, str | None, str | None]:
         def _ops():
-            res = self.conn.cursor().execute(
-                "SELECT gift_price_range, event_time, exchange_type FROM rooms WHERE room_iden = ?",
-                (room_iden,)).fetchone()
+            res = (
+                self.conn.cursor()
+                .execute(
+                    "SELECT gift_price_range, event_time, exchange_type FROM rooms WHERE room_iden = ?", (room_iden,)
+                )
+                .fetchone()
+            )
             if not res:
                 return "ROOM NOT EXISTS", None, None, None
             return True, res[0], res[1], res[2]
 
         return await asyncio.to_thread(_ops)
 
-    async def update_room_settings(self, room_iden: str, price: str | None = None, event_time: str | None = None,
-                                   exchange_type: str | None = None) -> str | None:
+    async def update_room_settings(
+        self, room_iden: str, price: str | None = None, event_time: str | None = None, exchange_type: str | None = None
+    ) -> str | None:
         def _ops():
             cur = self.conn.cursor()
             if not cur.execute("SELECT 1 FROM rooms WHERE room_iden = ?", (room_iden,)).fetchone():
@@ -314,8 +373,9 @@ class SqliteSaintRepository(ISaintRepository):
         def _ops():
             cur = self.conn.cursor()
             total_users = (cur.execute("SELECT COUNT(*) FROM users").fetchone() or [0])[0]
-            participants = \
-            (cur.execute("SELECT COUNT(DISTINCT tg_id) FROM user_rooms WHERE is_member = TRUE").fetchone() or [0])[0]
+            participants = (
+                cur.execute("SELECT COUNT(DISTINCT tg_id) FROM user_rooms WHERE is_member = TRUE").fetchone() or [0]
+            )[0]
             rooms_total = (cur.execute("SELECT COUNT(*) FROM rooms").fetchone() or [0])[0]
             started_rooms = (cur.execute("SELECT COUNT(*) FROM rooms WHERE status = TRUE").fetchone() or [0])[0]
             return total_users, participants, rooms_total, started_rooms

@@ -1,10 +1,9 @@
 import httpx
-from services.schemas.user import User
+
+from core.schemas.user import User
+from infrastructure.api_client.exceptions import APITooManyRooms, APIError, APIInvalidRoomName
 
 API_URL = "http://127.0.0.1:8000/api/rooms"
-class APIError(Exception): pass
-class APITooManyRooms(APIError): pass
-class APIInvalidRoomName(APIError): pass
 
 
 async def http_prepare_room(user: User) -> None:
@@ -14,7 +13,11 @@ async def http_prepare_room(user: User) -> None:
         if response.status_code == 400:
             raise APITooManyRooms()
 
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except httpx.HTTPStatusError as e:
+            raise APIError(str(e)) from e
+
 
 async def http_create_room(room_name: str, user_id: int) -> str:
     async with httpx.AsyncClient() as client:
@@ -23,5 +26,8 @@ async def http_create_room(room_name: str, user_id: int) -> str:
         if response.status_code == 422:
             raise APIInvalidRoomName()
 
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except httpx.HTTPStatusError as e:
+            raise APIError(str(e)) from e
         return response.json().get("room_id")

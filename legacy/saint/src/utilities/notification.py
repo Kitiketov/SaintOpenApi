@@ -29,6 +29,7 @@ def safe_send(max_retries: int = 1):
 
     return deco
 
+
 @safe_send(max_retries=1)
 async def notify_user(bot, user_id: int, text: str, reply_markup=None, message_effect_id=None):
     return await bot.send_message(
@@ -37,7 +38,11 @@ async def notify_user(bot, user_id: int, text: str, reply_markup=None, message_e
         reply_markup=reply_markup,
         message_effect_id=message_effect_id,
     )
-async def broadcast(bot, user_ids: list[int], text: str, reply_markup=None, message_effect_id=None, delay: float = 0.05):
+
+
+async def broadcast(
+    bot, user_ids: list[int], text: str, reply_markup=None, message_effect_id=None, delay: float = 0.05
+):
     for uid in user_ids:
         await notify_user(bot, uid, text, reply_markup=reply_markup, message_effect_id=message_effect_id)
         await asyncio.sleep(delay)

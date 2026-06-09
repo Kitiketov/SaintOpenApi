@@ -62,12 +62,8 @@ async def _perform_start_event(call, room_iden, room_name: str, include_admin: b
 
 
 @router.callback_query(CallbackFactory.filter(F.action == CallbackAction.DELETE_ROOM))
-async def delete_room(
-        call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext
-):
-    isMemberOrAdmin = await db.check_room_and_member(
-        call.from_user.id, callback_data.room_iden
-    )
+async def delete_room(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
+    isMemberOrAdmin = await db.check_room_and_member(call.from_user.id, callback_data.room_iden)
     room_name = await get_room_name(callback_data.room_iden)
 
     if isMemberOrAdmin == "ROOM NOT EXISTS":
@@ -78,20 +74,12 @@ async def delete_room(
         return
 
     kb = await room_admin_kb.confirm_kb(callback_data.room_iden, callback_data.asAdmin)
-    await call.message.answer(
-        messages.room_leave_confirmation(room_name), reply_markup=kb
-    )
+    await call.message.answer(messages.room_leave_confirmation(room_name), reply_markup=kb)
 
 
-@router.callback_query(
-    CallbackFactory.filter(F.action == CallbackAction.CONFIRM_DELETE)
-)
-async def delete_room(
-        call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext
-):
-    isMemberOrAdmin = await db.check_room_and_member(
-        call.from_user.id, callback_data.room_iden
-    )
+@router.callback_query(CallbackFactory.filter(F.action == CallbackAction.CONFIRM_DELETE))
+async def delete_room(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
+    isMemberOrAdmin = await db.check_room_and_member(call.from_user.id, callback_data.room_iden)
     room_name = await get_room_name(callback_data.room_iden)
 
     if isMemberOrAdmin == "ROOM NOT EXISTS":
@@ -102,30 +90,20 @@ async def delete_room(
         return
 
     await db.delete_room(callback_data.room_iden, call.from_user.id)
-    await call.message.edit_text(
-        messages.room_deleted(room_name), reply_markup=common_kb.choice_kb
-    )
+    await call.message.edit_text(messages.room_deleted(room_name), reply_markup=common_kb.choice_kb)
 
 
 @router.callback_query(CallbackFactory.filter(F.action == CallbackAction.REMOVE_MEMBER))
-async def remove_member(
-        call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext
-):
+async def remove_member(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
     members, *_ = await db.get_members_list(callback_data.room_iden)
 
     kb = await room_admin_kb.member_kb(members, callback_data.room_iden)
     await call.message.answer(messages.choose_option(), reply_markup=kb)
 
 
-@router.callback_query(
-    RemoveCallbackFactory.filter(F.action == CallbackAction.REMOVE_MEMBER)
-)
-async def removing_member(
-        call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext
-):
-    isMemberOrAdmin = await db.check_room_and_member(
-        callback_data.user_id, callback_data.room_iden
-    )
+@router.callback_query(RemoveCallbackFactory.filter(F.action == CallbackAction.REMOVE_MEMBER))
+async def removing_member(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
+    isMemberOrAdmin = await db.check_room_and_member(callback_data.user_id, callback_data.room_iden)
     room_name = await get_room_name(callback_data.room_iden)
 
     if isMemberOrAdmin == "MEMBER NOT EXISTS":
@@ -150,12 +128,8 @@ async def removing_member(
 
 
 @router.callback_query(CallbackFactory.filter(F.action == CallbackAction.START_EVENT))
-async def start_event(
-        call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext
-):
-    isMemberOrAdmin = await db.check_room_and_member(
-        call.from_user.id, callback_data.room_iden
-    )
+async def start_event(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
+    isMemberOrAdmin = await db.check_room_and_member(call.from_user.id, callback_data.room_iden)
     room_name = await get_room_name(callback_data.room_iden)
 
     if isMemberOrAdmin == "ROOM NOT EXISTS":
@@ -205,12 +179,8 @@ async def start_event(
     )
 
 
-@router.callback_query(
-    CallbackFactory.filter(F.action == CallbackAction.START_EVENT_JOIN_ADMIN)
-)
-async def start_event_join_admin(
-        call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext
-):
+@router.callback_query(CallbackFactory.filter(F.action == CallbackAction.START_EVENT_JOIN_ADMIN))
+async def start_event_join_admin(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
     room_name = await get_room_name(callback_data.room_iden)
     room_admin_id = await db.get_room_admin(callback_data.room_iden)
     if room_admin_id != call.from_user.id:
@@ -250,12 +220,8 @@ async def start_event_join_admin(
     )
 
 
-@router.callback_query(
-    CallbackFactory.filter(F.action == CallbackAction.START_EVENT_SKIP_ADMIN)
-)
-async def start_event_skip_admin(
-        call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext
-):
+@router.callback_query(CallbackFactory.filter(F.action == CallbackAction.START_EVENT_SKIP_ADMIN))
+async def start_event_skip_admin(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
     room_name = await get_room_name(callback_data.room_iden)
     room_admin_id = await db.get_room_admin(callback_data.room_iden)
     if room_admin_id != call.from_user.id:
@@ -274,12 +240,8 @@ async def start_event_skip_admin(
 
 
 @router.callback_query(CallbackFactory.filter(F.action == CallbackAction.REMIND_ABOUT_EVENT))
-async def remind_about_event(
-        call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext
-):
-    isMemberOrAdmin = await db.check_room_and_member(
-        call.from_user.id, callback_data.room_iden
-    )
+async def remind_about_event(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
+    isMemberOrAdmin = await db.check_room_and_member(call.from_user.id, callback_data.room_iden)
     room_name = await get_room_name(callback_data.room_iden)
 
     if isMemberOrAdmin == "ROOM NOT EXISTS":
@@ -309,9 +271,11 @@ async def remind_about_event(
         members.append(admin)
 
     members = [member[0] for member in members]
-    await notification.broadcast(call.bot, members,
-                                 text=messages.remind_notify(room_name),
-                                 reply_markup=await common_kb.ok_kb("None", asAdmin=False),
-                                 delay=RATE_LIMIT_DELAY,
-                                 )
+    await notification.broadcast(
+        call.bot,
+        members,
+        text=messages.remind_notify(room_name),
+        reply_markup=await common_kb.ok_kb("None", asAdmin=False),
+        delay=RATE_LIMIT_DELAY,
+    )
     await call.answer("Напоминание отправлено")

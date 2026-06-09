@@ -14,7 +14,7 @@ EFFECT_IDS = {
     '👎': "5104858069142078462",
     '❤️': "5044134455711629726",
     '🎉': "5046509860389126442",
-    '💩': "5046589136895476101"
+    '💩': "5046589136895476101",
 }
 
 
@@ -51,9 +51,7 @@ async def _delete_message_if_exists(message: Message) -> None:
 
 
 @router.callback_query(CallbackFactory.filter(F.action == CallbackAction.CANCEL))
-async def cancel(
-        call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext
-):
+async def cancel(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
     if callback_data.room_iden == "None":
         await state.clear()
     await _delete_message_if_exists(call.message)

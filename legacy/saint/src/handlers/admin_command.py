@@ -62,8 +62,9 @@ async def status(msg: Message):
         f"Комнат с запущенным ивентом: {started_rooms}"
     )
 
+
 @router.message(Command("test"))
 async def test(msg: Message):
     if not _is_admin(msg):
         return
-    await broadcast(msg.bot,db.get_all_users(),"test",delay=0.1)
+    await broadcast(msg.bot, db.get_all_users(), "test", delay=0.1)
