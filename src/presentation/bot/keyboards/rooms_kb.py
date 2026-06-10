@@ -1,8 +1,8 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from src.states import states
-from src.texts.callback_actions import CallbackAction
+from presentation.bot.states import states
+from presentation.bot.texts.callback_actions import CallbackAction
 
 my_rooms_kb = InlineKeyboardMarkup(
     inline_keyboard=[

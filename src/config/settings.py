@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     rate_limit_delay: float = 0.05
     api_port: int = 8090
     api_host: str = "0.0.0.0"
-
+    base_api_url: str = "http://127.0.0.1:8090/api"
     db_path: str = "database.db"
 
     room_default_price: str = "не установлен"

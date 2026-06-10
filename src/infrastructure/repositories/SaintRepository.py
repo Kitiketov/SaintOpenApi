@@ -91,7 +91,7 @@ class SqliteSaintRepository(ISaintRepository):
             cur.execute("INSERT OR IGNORE INTO user_rooms (tg_id, room_iden) VALUES (?, ?)", (user_id, room_iden))
             cur.execute("UPDATE user_rooms SET is_admin = TRUE WHERE tg_id = ? AND room_iden = ?", (user_id, room_iden))
             self.conn.commit()
-            return room_id
+            return room_iden
 
         return await asyncio.to_thread(_db_ops)
 

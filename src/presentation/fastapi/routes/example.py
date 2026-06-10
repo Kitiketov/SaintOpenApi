@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from fastapi import APIRouter, Request, Depends
+from fastapi import APIRouter, Depends
 
 from presentation.fastapi.dependencies import get_service
 from presentation.fastapi.schemas.example import ExampleRequest, ExampleResponse
@@ -24,7 +24,6 @@ router = APIRouter()
 @router.post("/example")
 async def example(
     payload: ExampleRequest,
-    request: Request,
     example_repo: IExampleRepository = Depends(get_service(IExampleRepository)),
 ) -> ExampleResponse:
     """

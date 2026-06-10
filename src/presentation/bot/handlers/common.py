@@ -3,10 +3,10 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, ReactionTypeEmoji
 
-from src.keyboards import common_kb
-from src.states.states import CallbackFactory
-from src.texts import messages
-from src.texts.callback_actions import CallbackAction
+from presentation.bot.keyboards import common_kb
+from presentation.bot.states.states import CallbackFactory
+from presentation.bot.texts import messages
+from presentation.bot.texts.callback_actions import CallbackAction
 
 EFFECT_IDS = {
     '🔥': "5104841245755180586",

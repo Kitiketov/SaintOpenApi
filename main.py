@@ -1,5 +1,6 @@
 import asyncio
 
+import httpx
 import uvicorn
 
 from config.logger import setup_logging
@@ -21,8 +22,7 @@ async def main() -> None:
     container = init_container(settings)
     saint_repo = container.resolve(ISaintRepository)
     await saint_repo.start_db()
-    app = create_api_app()
-    app.state.container = container
+    app = create_api_app(container)
 
     config = uvicorn.Config(
         app=app,
@@ -35,10 +35,12 @@ async def main() -> None:
 
     try:
         pass
-    #     await run_bot(bot, moderation_client)
+    #     await run_bot(bot, container)
     finally:
         #     server.should_exit = True
         await api_task
+        client = container.resolve(httpx.AsyncClient)
+        await client.aclose()
     #     await session.close()
     #     await bot.session.close()
 
