@@ -9,8 +9,10 @@ class Settings(BaseSettings):
     rate_limit_delay: float = 0.05
     api_port: int = 8090
     api_host: str = "0.0.0.0"
+    ngrok_host: str = "bribe-womankind-stuck.ngrok-free.dev"
     base_api_url: str = "http://127.0.0.1:8090/api"
     db_path: str = "database.db"
+    jwt_secret_key: str = "ABOBAABOBAABOBAABOBAABOBAABOBA"
 
     room_default_price: str = "не установлен"
     room_default_event_time: str = "не установлено"
