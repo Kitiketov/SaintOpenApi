@@ -2,6 +2,7 @@ import httpx
 from punq import Container
 
 from core.services.room_service import IRoomService, RoomService
+from core.services.user_service import UserService, IUserService
 from infrastructure.api_client.room_client import RoomClient
 from infrastructure.repositories.SaintRepository import SqliteSaintRepository
 from infrastructure.repositories.interfaces.ISaintRepository import ISaintRepository
@@ -20,6 +21,7 @@ def init_container(settings: Settings) -> Container:
 
     container.register(IExampleRepository, ExampleRepository)
     container.register(IRoomService, RoomService)
+    container.register(IUserService, UserService)
     container.register(ISaintRepository, SqliteSaintRepository)
 
     return container
