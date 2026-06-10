@@ -7,10 +7,13 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.exceptions import TelegramBadRequest
 
 from src.db import db
-from src.keyboards import common_kb, room_admin_kb, room_member_kb, rooms_kb
-from src.states.states import CallbackFactory
-from src.texts import messages, text
-from src.texts.callback_actions import CallbackAction
+
+from infrastructure.api_client.exceptions import APIError
+from infrastructure.api_client.user_client import UserClient
+from presentation.bot.keyboards import common_kb, room_member_kb, room_admin_kb, rooms_kb
+from presentation.bot.states.states import CallbackFactory
+from presentation.bot.texts import messages, text
+from presentation.bot.texts.callback_actions import CallbackAction
 
 
 async def get_room_name(room_iden):
@@ -104,8 +107,14 @@ async def get_list_of_rooms(call: CallbackQuery, callback_data: CallbackFactory,
 
 
 @router.callback_query(CallbackFactory.filter(F.action == CallbackAction.MY_ROOMS))
-async def get_my_admin_rooms(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
-    rooms = await db.get_my_rooms(call.from_user.id, callback_data.asAdmin)
+async def get_my_admin_rooms(
+    call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext, user_client: UserClient
+):
+    try:
+        rooms = await user_client.http_get_rooms(call.from_user.id, callback_data.asAdmin)
+    except APIError:
+        await call.message.answer("Ошибка сервера")
+        return
 
     kb = await rooms_kb.rooms_kb(rooms, callback_data.asAdmin)
     await call.message.edit_text(messages.choose_option(), reply_markup=kb)

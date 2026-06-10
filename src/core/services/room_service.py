@@ -16,19 +16,19 @@ class IRoomService(ABC):
 
 
 class RoomService(IRoomService):
-    def __init__(self, saint_repo: ISaintRepository):
-        self.saint_repo = saint_repo
+    def __init__(self, repo: ISaintRepository):
+        self.repo = repo
 
     async def prepare_create_room(self, user: User) -> None:
-        room_count = await self.saint_repo.count_user_room(user.id)
+        room_count = await self.repo.count_user_room(user.id)
 
         if room_count > 5:
             raise TooManyRoomsException()
 
-        await self.saint_repo.add_user(user)
+        await self.repo.add_user(user)
 
     async def create_new_room(self, room_name: str, user_id: int) -> str:
-        room_id = await self.saint_repo.create_room(room_name, user_id)
+        room_id = await self.repo.create_room(room_name, user_id)
 
         if not room_id:
             raise InvalidRoomNameException()

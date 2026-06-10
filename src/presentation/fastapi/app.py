@@ -5,6 +5,7 @@ from core.exceptions import TooManyRoomsException, InvalidRoomNameException
 from presentation.fastapi.exception_handler import too_many_rooms_handler, invalid_room_name_handler
 from presentation.fastapi.routes.example import router as example_router
 from presentation.fastapi.routes.room import router as room_router
+from presentation.fastapi.routes.user import router as user_router
 
 
 def create_api_app(container: Container) -> FastAPI:
@@ -17,4 +18,5 @@ def create_api_app(container: Container) -> FastAPI:
 
     app.include_router(example_router, prefix="/api", tags=["example"])
     app.include_router(room_router, prefix="/api/rooms", tags=["rooms"])
+    app.include_router(user_router, prefix="/api/users", tags=["users"])
     return app
