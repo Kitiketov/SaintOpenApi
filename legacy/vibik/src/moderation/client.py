@@ -6,7 +6,7 @@ import aiohttp
 from aiohttp import ClientSession, ClientTimeout
 
 from src.core.config import settings
-from src.moderation.models import MetricsListModel, ModerationTask,ModeratorCheckResponse
+from src.moderation.models import MetricsListModel, ModerationTask, ModeratorCheckResponse
 
 
 class ModerationClient:
@@ -62,6 +62,7 @@ class ModerationClient:
             if isinstance(data, bool):
                 return data
             return False
+
 
 async def create_http_session() -> ClientSession:
     connector = aiohttp.TCPConnector()

@@ -17,9 +17,7 @@ router = Router(name=__name__)
 
 
 @router.callback_query(CallbackFactory.filter(F.action == CallbackAction.JOIN_ROOM))
-async def start_join_room(
-    call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext
-):
+async def start_join_room(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
     await db.add_user(call.from_user)
     await state.set_state(Gen.room_name_to_join)
     await call.message.answer(

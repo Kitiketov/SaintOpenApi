@@ -1,8 +1,7 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from src.states import states
-from src.texts.callback_actions import CallbackAction
-
+from presentation.bot.states import states
+from presentation.bot.texts.callback_actions import CallbackAction
 
 choice_kb = InlineKeyboardMarkup(
     inline_keyboard=[
@@ -33,9 +32,7 @@ choice_kb = InlineKeyboardMarkup(
         [
             InlineKeyboardButton(
                 text="🚫Закрыть окно",
-                callback_data=states.CallbackFactory(
-                    action=CallbackAction.CANCEL, room_iden=" ", asAdmin=False
-                ).pack(),
+                callback_data=states.CallbackFactory(action=CallbackAction.CANCEL, room_iden=" ", asAdmin=False).pack(),
             )
         ],
     ]

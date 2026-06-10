@@ -13,9 +13,7 @@ router = Router(name=__name__)
 
 
 @router.callback_query(CallbackFactory.filter(F.action == CallbackAction.CREATE_ROOM))
-async def start_create_room(
-    call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext
-):
+async def start_create_room(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
     room_count = await db.count_user_room(call.from_user.id)
 
     if room_count > 5:

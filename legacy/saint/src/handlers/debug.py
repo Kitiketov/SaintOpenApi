@@ -18,10 +18,7 @@ async def get_id(msg: Message):
 
     if msg.forward_from:
         original_user_id = msg.forward_from.id
-        await msg.answer(
-            f"Твой id: {forwarder_id}\n"
-            f"ID оригинального отправителя: {original_user_id}"
-        )
+        await msg.answer(f"Твой id: {forwarder_id}\n" f"ID оригинального отправителя: {original_user_id}")
         return
 
     if msg.forward_from_chat:
@@ -34,6 +31,5 @@ async def get_id(msg: Message):
         return
 
     await msg.answer(
-        "Не могу получить ID оригинального отправителя — "
-        "скорее всего, у него включена приватность пересылок."
+        "Не могу получить ID оригинального отправителя — " "скорее всего, у него включена приватность пересылок."
     )

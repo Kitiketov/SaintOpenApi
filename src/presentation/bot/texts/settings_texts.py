@@ -8,10 +8,7 @@ def room_settings_info(room_name, price, event_time, exchange_type):
 
 
 def prompt_price(price):
-    return (
-        f"Текущий диапазон: {price}\n"
-        "Напишите новый диапазон стоимости через дефис (например 500-1500)."
-    )
+    return f"Текущий диапазон: {price}\n" "Напишите новый диапазон стоимости через дефис (например 500-1500)."
 
 
 def invalid_price():
@@ -19,10 +16,7 @@ def invalid_price():
 
 
 def prompt_event_time(event_time):
-    return (
-        f"Текущее время проведения: {event_time}\n"
-        "Укажите дату в формате ДД:ММ (например 24:12)."
-    )
+    return f"Текущее время проведения: {event_time}\n" "Укажите дату в формате ДД:ММ (например 24:12)."
 
 
 def invalid_event_time():
@@ -30,10 +24,7 @@ def invalid_event_time():
 
 
 def choose_exchange_type(current_type):
-    return (
-        f"Текущий тип обмена: {current_type}\n"
-        "Выберите новый вариант:"
-    )
+    return f"Текущий тип обмена: {current_type}\n" "Выберите новый вариант:"
 
 
 def settings_updated(room_name, price, event_time, exchange_type):

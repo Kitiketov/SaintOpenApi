@@ -1,6 +1,3 @@
-import asyncio
-
-
 async def create_user_info(user):
     text = f"{user[1]} "
     if user[2] is not None:

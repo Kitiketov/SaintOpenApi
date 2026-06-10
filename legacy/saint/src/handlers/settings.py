@@ -32,12 +32,8 @@ async def check_room_access(user_id, room_iden):
 
 
 @router.callback_query(CallbackFactory.filter(F.action == CallbackAction.EDIT_ROOM_SETTINGS))
-async def show_room_settings(
-    call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext
-):
-    access, room_name = await check_room_access(
-        call.from_user.id, callback_data.room_iden
-    )
+async def show_room_settings(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
+    access, room_name = await check_room_access(call.from_user.id, callback_data.room_iden)
 
     if access == "ROOM NOT EXISTS":
         await call.message.edit_text(
@@ -53,27 +49,15 @@ async def show_room_settings(
         )
         return
 
-    _, price, event_time, exchange_type = await db.get_room_settings(
-        callback_data.room_iden
-    )
-    info = settings_texts.room_settings_info(
-        room_name, price, event_time, exchange_type
-    )
-    kb = await settings_kb.settings_view_kb(
-        callback_data.room_iden, callback_data.asAdmin
-    )
+    _, price, event_time, exchange_type = await db.get_room_settings(callback_data.room_iden)
+    info = settings_texts.room_settings_info(room_name, price, event_time, exchange_type)
+    kb = await settings_kb.settings_view_kb(callback_data.room_iden, callback_data.asAdmin)
     await call.message.answer(info, reply_markup=kb)
 
 
-@router.callback_query(
-    CallbackFactory.filter(F.action == CallbackAction.SHOW_ROOM_SETTINGS)
-)
-async def show_room_settings_member(
-    call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext
-):
-    status = await db.check_room_and_member(
-        call.from_user.id, callback_data.room_iden
-    )
+@router.callback_query(CallbackFactory.filter(F.action == CallbackAction.SHOW_ROOM_SETTINGS))
+async def show_room_settings_member(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
+    status = await db.check_room_and_member(call.from_user.id, callback_data.room_iden)
     room_name = await get_room_name(callback_data.room_iden)
 
     if status == "ROOM NOT EXISTS":
@@ -90,27 +74,15 @@ async def show_room_settings_member(
         )
         return
 
-    _, price, event_time, exchange_type = await db.get_room_settings(
-        callback_data.room_iden
-    )
-    info = settings_texts.room_settings_info(
-        room_name, price, event_time, exchange_type
-    )
-    kb = await settings_kb.settings_view_kb(
-        callback_data.room_iden, callback_data.asAdmin
-    )
+    _, price, event_time, exchange_type = await db.get_room_settings(callback_data.room_iden)
+    info = settings_texts.room_settings_info(room_name, price, event_time, exchange_type)
+    kb = await settings_kb.settings_view_kb(callback_data.room_iden, callback_data.asAdmin)
     await call.message.answer(info, reply_markup=kb)
 
 
-@router.callback_query(
-    CallbackFactory.filter(F.action == CallbackAction.OPEN_ROOM_SETTINGS_EDIT)
-)
-async def open_settings_edit(
-    call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext
-):
-    access, room_name = await check_room_access(
-        call.from_user.id, callback_data.room_iden
-    )
+@router.callback_query(CallbackFactory.filter(F.action == CallbackAction.OPEN_ROOM_SETTINGS_EDIT))
+async def open_settings_edit(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
+    access, room_name = await check_room_access(call.from_user.id, callback_data.room_iden)
 
     if access == "ROOM NOT EXISTS":
         await call.message.edit_text(
@@ -126,25 +98,15 @@ async def open_settings_edit(
         )
         return
 
-    _, price, event_time, exchange_type = await db.get_room_settings(
-        callback_data.room_iden
-    )
-    info = settings_texts.room_settings_info(
-        room_name, price, event_time, exchange_type
-    )
-    kb = await settings_kb.settings_edit_kb(
-        callback_data.room_iden, callback_data.asAdmin
-    )
+    _, price, event_time, exchange_type = await db.get_room_settings(callback_data.room_iden)
+    info = settings_texts.room_settings_info(room_name, price, event_time, exchange_type)
+    kb = await settings_kb.settings_edit_kb(callback_data.room_iden, callback_data.asAdmin)
     await call.message.edit_text(info, reply_markup=kb)
 
 
 @router.callback_query(CallbackFactory.filter(F.action == CallbackAction.EDIT_ROOM_PRICE))
-async def edit_room_price(
-    call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext
-):
-    access, room_name = await check_room_access(
-        call.from_user.id, callback_data.room_iden
-    )
+async def edit_room_price(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
+    access, room_name = await check_room_access(call.from_user.id, callback_data.room_iden)
 
     if access == "ROOM NOT EXISTS":
         await call.message.edit_text(
@@ -171,12 +133,8 @@ async def edit_room_price(
 
 
 @router.callback_query(CallbackFactory.filter(F.action == CallbackAction.EDIT_ROOM_TIME))
-async def edit_room_time(
-    call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext
-):
-    access, room_name = await check_room_access(
-        call.from_user.id, callback_data.room_iden
-    )
+async def edit_room_time(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
+    access, room_name = await check_room_access(call.from_user.id, callback_data.room_iden)
 
     if access == "ROOM NOT EXISTS":
         await call.message.edit_text(
@@ -203,12 +161,8 @@ async def edit_room_time(
 
 
 @router.callback_query(CallbackFactory.filter(F.action == CallbackAction.EDIT_ROOM_TYPE))
-async def edit_room_type(
-    call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext
-):
-    access, room_name = await check_room_access(
-        call.from_user.id, callback_data.room_iden
-    )
+async def edit_room_type(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
+    access, room_name = await check_room_access(call.from_user.id, callback_data.room_iden)
 
     if access == "ROOM NOT EXISTS":
         await call.message.edit_text(
@@ -227,25 +181,15 @@ async def edit_room_type(
     _, _, _, exchange_type = await db.get_room_settings(callback_data.room_iden)
     await call.message.edit_text(
         settings_texts.choose_exchange_type(exchange_type),
-        reply_markup=await settings_kb.settings_type_kb(
-            callback_data.room_iden, callback_data.asAdmin
-        ),
+        reply_markup=await settings_kb.settings_type_kb(callback_data.room_iden, callback_data.asAdmin),
     )
 
 
 @router.callback_query(
-    CallbackFactory.filter(
-        F.action.in_(
-            [CallbackAction.SET_ROOM_TYPE_CENTRAL, CallbackAction.SET_ROOM_TYPE_THROW]
-        )
-    )
+    CallbackFactory.filter(F.action.in_([CallbackAction.SET_ROOM_TYPE_CENTRAL, CallbackAction.SET_ROOM_TYPE_THROW]))
 )
-async def set_room_type(
-    call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext
-):
-    access, room_name = await check_room_access(
-        call.from_user.id, callback_data.room_iden
-    )
+async def set_room_type(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
+    access, room_name = await check_room_access(call.from_user.id, callback_data.room_iden)
 
     if access == "ROOM NOT EXISTS":
         await call.message.edit_text(
@@ -261,14 +205,8 @@ async def set_room_type(
         )
         return
 
-    new_type = (
-        "централизованый"
-        if callback_data.action == CallbackAction.SET_ROOM_TYPE_CENTRAL
-        else "подброс подарка"
-    )
-    status = await db.update_room_settings(
-        callback_data.room_iden, exchange_type=new_type
-    )
+    new_type = "централизованый" if callback_data.action == CallbackAction.SET_ROOM_TYPE_CENTRAL else "подброс подарка"
+    status = await db.update_room_settings(callback_data.room_iden, exchange_type=new_type)
     if status == "ROOM NOT EXISTS":
         await call.message.edit_text(
             messages.room_not_exists(room_name),
@@ -276,15 +214,9 @@ async def set_room_type(
         )
         return
 
-    _, price, event_time, exchange_type = await db.get_room_settings(
-        callback_data.room_iden
-    )
-    info = settings_texts.settings_updated(
-        room_name, price, event_time, exchange_type
-    )
-    kb = await settings_kb.settings_view_kb(
-        callback_data.room_iden, callback_data.asAdmin
-    )
+    _, price, event_time, exchange_type = await db.get_room_settings(callback_data.room_iden)
+    info = settings_texts.settings_updated(room_name, price, event_time, exchange_type)
+    kb = await settings_kb.settings_view_kb(callback_data.room_iden, callback_data.asAdmin)
     await call.message.edit_text(info, reply_markup=kb)
 
 
@@ -299,9 +231,7 @@ async def set_room_price(msg: Message, state: FSMContext):
             _, price, event_time, exchange_type = await db.get_room_settings(room_iden)
             room_name = await get_room_name(room_iden)
             await msg.answer(
-                settings_texts.room_settings_info(
-                    room_name, price, event_time, exchange_type
-                ),
+                settings_texts.room_settings_info(room_name, price, event_time, exchange_type),
                 reply_markup=await settings_kb.settings_view_kb(room_iden, True),
             )
         else:
@@ -341,9 +271,7 @@ async def set_room_price(msg: Message, state: FSMContext):
     _, new_price, event_time, exchange_type = await db.get_room_settings(room_iden)
     await state.clear()
     await msg.answer(
-        settings_texts.settings_updated(
-            room_name, new_price, event_time, exchange_type
-        ),
+        settings_texts.settings_updated(room_name, new_price, event_time, exchange_type),
         reply_markup=await settings_kb.settings_view_kb(room_iden, True),
     )
 
@@ -359,9 +287,7 @@ async def set_room_time(msg: Message, state: FSMContext):
             _, price, event_time, exchange_type = await db.get_room_settings(room_iden)
             room_name = await get_room_name(room_iden)
             await msg.answer(
-                settings_texts.room_settings_info(
-                    room_name, price, event_time, exchange_type
-                ),
+                settings_texts.room_settings_info(room_name, price, event_time, exchange_type),
                 reply_markup=await settings_kb.settings_view_kb(room_iden, True),
             )
         else:
@@ -401,8 +327,6 @@ async def set_room_time(msg: Message, state: FSMContext):
     _, price, new_event_time, exchange_type = await db.get_room_settings(room_iden)
     await state.clear()
     await msg.answer(
-        settings_texts.settings_updated(
-            room_name, price, new_event_time, exchange_type
-        ),
+        settings_texts.settings_updated(room_name, price, new_event_time, exchange_type),
         reply_markup=await settings_kb.settings_view_kb(room_iden, True),
     )

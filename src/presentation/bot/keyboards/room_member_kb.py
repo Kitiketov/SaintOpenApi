@@ -1,7 +1,7 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from src.states import states
-from src.texts.callback_actions import CallbackAction
+from presentation.bot.states import states
+from presentation.bot.texts.callback_actions import CallbackAction
 
 
 async def room_member_kb(room_iden):

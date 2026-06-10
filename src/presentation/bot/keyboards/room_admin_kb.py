@@ -1,8 +1,8 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from src.states import states
-from src.texts.callback_actions import CallbackAction
+from presentation.bot.states import states
+from presentation.bot.texts.callback_actions import CallbackAction
 
 
 async def room_admin_kb(room_iden):
@@ -175,9 +175,7 @@ async def member_kb(members, room_iden):
         builder.adjust(1)
     builder.button(
         text="🚫Отмена",
-        callback_data=states.CallbackFactory(
-            action=CallbackAction.CANCEL, room_iden=room_iden, asAdmin=True
-        ).pack(),
+        callback_data=states.CallbackFactory(action=CallbackAction.CANCEL, room_iden=room_iden, asAdmin=True).pack(),
     )
     builder.adjust(1)
     return builder.as_markup()

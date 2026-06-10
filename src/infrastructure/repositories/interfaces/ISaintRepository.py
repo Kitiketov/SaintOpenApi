@@ -101,11 +101,7 @@ class ISaintRepository(ABC):
 
     @abstractmethod
     async def update_room_settings(
-        self,
-        room_iden: str,
-        price: str | None = None,
-        event_time: str | None = None,
-        exchange_type: str | None = None
+        self, room_iden: str, price: str | None = None, event_time: str | None = None, exchange_type: str | None = None
     ) -> str | None:
         """Обновляет конфигурацию настроек комнаты."""
         pass
