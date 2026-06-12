@@ -14,6 +14,7 @@ from presentation.bot.keyboards import common_kb, room_member_kb, room_admin_kb,
 from presentation.bot.states.states import CallbackFactory
 from presentation.bot.texts import messages, text
 from presentation.bot.texts.callback_actions import CallbackAction
+from presentation.bot.utils.rooms import pick_rooms
 
 
 async def get_room_name(room_iden):
@@ -111,7 +112,9 @@ async def get_my_admin_rooms(
     call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext, user_client: UserClient
 ):
     try:
-        rooms = await user_client.http_get_rooms(call.from_user.id, callback_data.asAdmin)
+        rooms_data = await user_client.http_get_rooms(callback_data.asAdmin)
+        rooms = pick_rooms(rooms_data)
+
     except APIError:
         await call.message.answer("Ошибка сервера")
         return
