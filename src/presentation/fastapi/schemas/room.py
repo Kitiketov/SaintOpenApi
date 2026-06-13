@@ -3,13 +3,8 @@ from pydantic import BaseModel
 from core.schemas.user import User
 
 
-class PreparePayload(BaseModel):
-    user: User | None = None
-
-
 class CreatePayload(BaseModel):
     room_name: str
-    user_id: int
 
 
 class PrepareResponse(BaseModel):
@@ -18,3 +13,9 @@ class PrepareResponse(BaseModel):
 
 class CreateResponse(BaseModel):
     room_iden: str
+
+class RoomSettingsResponse(BaseModel):
+    room_name: str | bool
+    price: str | None
+    event_time: str | None
+    exchange_type: str | None
