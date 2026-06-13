@@ -19,3 +19,8 @@ class MemberNotExistException(BaseRoomException):
 
 class UserNotAdminException(BaseRoomException):
     pass
+
+class UserAlreadyExistException(BaseRoomException):
+    pass
+class JoinTooLateException(BaseRoomException):
+    pass

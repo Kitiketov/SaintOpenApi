@@ -20,7 +20,6 @@ class SqliteSaintRepository(ISaintRepository):
             ".",
             "/",
             ",",
-            ":",
             ";",
             "'",
             '"',
@@ -81,13 +80,13 @@ class SqliteSaintRepository(ISaintRepository):
             cur = self.conn.cursor()
             while True:
                 room_id = f"{random.randint(1, 9999):04}"
-                room_iden = f"{room_name}{room_id}"
+                room_iden = f"{room_name}:{room_id}"
                 if not cur.execute("SELECT 1 FROM rooms WHERE room_iden = ?", (room_iden,)).fetchone():
                     break
 
             cur.execute("INSERT INTO rooms (room_iden, admin) VALUES (?, ?)", (room_iden, user_id))
-            cur.execute(f"CREATE TABLE {room_iden}_mem (user_id INTEGER PRIMARY KEY, wishes TEXT, photo_id TEXT)")
-            cur.execute(f"CREATE TABLE {room_iden}_saint (saint_user_id INTEGER PRIMARY KEY, reciver_user_id INTEGER)")
+            cur.execute(f"CREATE TABLE [{room_iden}_mem] (user_id INTEGER PRIMARY KEY, wishes TEXT, photo_id TEXT)")
+            cur.execute(f"CREATE TABLE [{room_iden}_saint] (saint_user_id INTEGER PRIMARY KEY, reciver_user_id INTEGER)")
             cur.execute("INSERT OR IGNORE INTO user_rooms (tg_id, room_iden) VALUES (?, ?)", (user_id, room_iden))
             cur.execute("UPDATE user_rooms SET is_admin = TRUE WHERE tg_id = ? AND room_iden = ?", (user_id, room_iden))
             self.conn.commit()
@@ -120,9 +119,8 @@ class SqliteSaintRepository(ISaintRepository):
 
         await asyncio.to_thread(_ops)
 
-    async def connect_to_room(self, room_name: str, room_id: str, user_id: int) -> str | bool:
-        room_iden = f"{room_name}{room_id}"
-        if not self._is_valid_name(room_name):
+    async def connect_to_room(self, room_iden: str, user_id: int) -> str | bool:
+        if not self._is_valid_name(room_iden):
             return "room_error"
 
         def _ops():
@@ -133,10 +131,10 @@ class SqliteSaintRepository(ISaintRepository):
             if room[1]:  # status == True (событие запущено)
                 return "joined late"
 
-            if cur.execute(f"SELECT * FROM {room_iden}_mem WHERE user_id = ?", (user_id,)).fetchone():
+            if cur.execute(f"SELECT * FROM [{room_iden}_mem] WHERE user_id = ?", (user_id,)).fetchone():
                 return "user_error"
 
-            cur.execute(f"INSERT INTO {room_iden}_mem (user_id, wishes) VALUES (?, '-')", (user_id,))
+            cur.execute(f"INSERT INTO [{room_iden}_mem] (user_id, wishes) VALUES (?, '-')", (user_id,))
 
             if not cur.execute(
                 "SELECT * FROM user_rooms WHERE tg_id = ? AND room_iden = ?", (user_id, room_iden)
@@ -158,7 +156,7 @@ class SqliteSaintRepository(ISaintRepository):
         def _ops():
             cur = self.conn.cursor()
             admin_id = cur.execute("SELECT admin FROM rooms WHERE room_iden = ?", (room_iden,)).fetchone()[0]
-            member_ids = cur.execute(f"SELECT user_id FROM {room_iden}_mem").fetchall()
+            member_ids = cur.execute(f"SELECT user_id FROM [{room_iden}_mem]").fetchall()
             admin = cur.execute("SELECT * FROM users WHERE tg_id = ?", (admin_id,)).fetchone()
 
             member_list = []
@@ -177,7 +175,7 @@ class SqliteSaintRepository(ISaintRepository):
     async def leave_room(self, room_iden: str, user_id: int) -> None:
         def _ops():
             cur = self.conn.cursor()
-            cur.execute(f"DELETE FROM {room_iden}_mem WHERE user_id = ?", (user_id,))
+            cur.execute(f"DELETE FROM [{room_iden}_mem] WHERE user_id = ?", (user_id,))
             cur.execute(
                 "UPDATE user_rooms SET is_member = FALSE WHERE tg_id = ? AND room_iden = ?", (user_id, room_iden)
             )
@@ -203,12 +201,12 @@ class SqliteSaintRepository(ISaintRepository):
     async def delete_room(self, room_iden: str, admin_id: int) -> None:
         def _ops():
             cur = self.conn.cursor()
-            users_id = cur.execute(f"SELECT user_id FROM {room_iden}_mem").fetchall()
+            users_id = cur.execute(f"SELECT user_id FROM [{room_iden}_mem]").fetchall()
             cur.execute("DELETE FROM user_rooms WHERE tg_id = ? AND room_iden = ?", (admin_id, room_iden))
             for (u_id,) in users_id:
                 cur.execute("DELETE FROM user_rooms WHERE tg_id = ? AND room_iden = ?", (u_id, room_iden))
-            cur.execute(f"DROP TABLE IF EXISTS {room_iden}_mem")
-            cur.execute(f"DROP TABLE IF EXISTS {room_iden}_saint")
+            cur.execute(f"DROP TABLE IF EXISTS [{room_iden}_mem]")
+            cur.execute(f"DROP TABLE IF EXISTS [{room_iden}_saint]")
             cur.execute("DELETE FROM rooms WHERE room_iden = ?", (room_iden,))
             self.conn.commit()
 
@@ -219,7 +217,7 @@ class SqliteSaintRepository(ISaintRepository):
             cur = self.conn.cursor()
             for giver, receiver in pairs.items():
                 cur.execute(
-                    f"INSERT INTO {room_iden}_saint (saint_user_id, reciver_user_id) VALUES (?, ?)", (giver, receiver)
+                    f"INSERT INTO [{room_iden}_saint] (saint_user_id, reciver_user_id) VALUES (?, ?)", (giver, receiver)
                 )
             self.conn.commit()
 
@@ -237,7 +235,7 @@ class SqliteSaintRepository(ISaintRepository):
         def _ops():
             cur = self.conn.cursor()
             pair = cur.execute(
-                f"SELECT reciver_user_id FROM {room_iden}_saint WHERE saint_user_id = ?", (user_id,)
+                f"SELECT reciver_user_id FROM [{room_iden}_saint] WHERE saint_user_id = ?", (user_id,)
             ).fetchone()
             return pair[0] if pair else "JOINED LATE"
 
@@ -262,7 +260,7 @@ class SqliteSaintRepository(ISaintRepository):
             room = cur.execute("SELECT admin FROM rooms WHERE room_iden = ?", (room_iden,)).fetchone()
             if not room:
                 return "ROOM NOT EXISTS"
-            user = cur.execute(f"SELECT 1 FROM {room_iden}_mem WHERE user_id = ?", (user_id,)).fetchone()
+            user = cur.execute(f"SELECT 1 FROM [{room_iden}_mem] WHERE user_id = ?", (user_id,)).fetchone()
             if not user and room[0] == user_id:
                 return "IS ADMIN"
             if not user:
@@ -290,7 +288,7 @@ class SqliteSaintRepository(ISaintRepository):
             cur = self.conn.cursor()
             if not cur.execute("SELECT 1 FROM rooms WHERE room_iden = ?", (room_iden,)).fetchone():
                 return "ROOM NOT EXISTS", None, None
-            user = cur.execute(f"SELECT wishes, photo_id FROM {room_iden}_mem WHERE user_id = ?", (user_id,)).fetchone()
+            user = cur.execute(f"SELECT wishes, photo_id FROM [{room_iden}_mem] WHERE user_id = ?", (user_id,)).fetchone()
             if not user:
                 return "MEMBER NOT EXISTS", None, None
             return True, user[0], user[1]
@@ -302,7 +300,7 @@ class SqliteSaintRepository(ISaintRepository):
             cur = self.conn.cursor()
             if not cur.execute("SELECT 1 FROM rooms WHERE room_iden = ?", (room_iden,)).fetchone():
                 return "ROOM NOT EXISTS"
-            if not cur.execute(f"SELECT 1 FROM {room_iden}_mem WHERE user_id = ?", (user_id,)).fetchone():
+            if not cur.execute(f"SELECT 1 FROM [{room_iden}_mem] WHERE user_id = ?", (user_id,)).fetchone():
                 return "MEMBER NOT EXISTS"
             cur.execute(
                 f"UPDATE {room_iden}_mem SET wishes = ?, photo_id = ? WHERE user_id = ?", (wishes, photo_id, user_id)

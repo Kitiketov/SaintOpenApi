@@ -4,7 +4,8 @@ from core.schemas.user import User
 from core.services.room_service import IRoomService
 from presentation.fastapi.auth import get_current_user
 from presentation.fastapi.dependencies import get_service
-from presentation.fastapi.schemas.room import CreatePayload, PrepareResponse, CreateResponse, RoomSettingsResponse
+from presentation.fastapi.schemas.room import CreatePayload, PrepareResponse, CreateResponse, RoomSettingsResponse, \
+    ConnectResponse
 
 router = APIRouter()
 
@@ -46,3 +47,13 @@ async def get_room_settings(
             event_time=event_time,
             exchange_type=exchange_type,
         )
+
+@router.post("/{room_iden}/users")
+async def api_connect_room(
+    room_iden: str,
+    current_user: User = Depends(get_current_user),
+    room_service: IRoomService = Depends(get_service(IRoomService))
+) -> ConnectResponse:
+    status = await room_service.connect_room(room_iden, current_user.id)
+    return ConnectResponse(status=status)
+

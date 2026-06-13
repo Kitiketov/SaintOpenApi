@@ -20,7 +20,7 @@ class ISaintRepository(ABC):
         pass
 
     @abstractmethod
-    async def connect_to_room(self, room_name: str, room_id: str, user_id: int) -> str | bool:
+    async def connect_to_room(self, room_iden: str, user_id: int) -> str | bool:
         """Подключает пользователя к комнате. Возвращает True или строку ошибки."""
         pass
 

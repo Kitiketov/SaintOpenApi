@@ -2,7 +2,7 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 
 from core.exceptions import TooManyRoomsException, InvalidRoomNameException, RoomNotExistException, \
-    MemberNotExistException, UserNotAdminException
+    MemberNotExistException, UserNotAdminException, JoinTooLateException,UserAlreadyExistException
 
 
 async def too_many_rooms_handler(request: Request, exc: TooManyRoomsException):
@@ -20,3 +20,7 @@ async def member_not_exists_handler(request: Request, exc: MemberNotExistExcepti
 
 async def user_not_admin_handler(request: Request, exc: UserNotAdminException):
     return JSONResponse(status_code=403, content={"detail": f"User is not admin of room '{exc.room_name}'"})
+async def join_too_late_handler(request: Request, exc: JoinTooLateException):
+    return JSONResponse(status_code=422, content={"detail": "Event started"})
+async def user_already_exists_handler(request: Request, exc: UserAlreadyExistException):
+    return JSONResponse(status_code=403, content={"detail": f"User '{exc.room_name}' already exists"})

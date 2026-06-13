@@ -38,7 +38,7 @@ async def rooms_kb(rooms_idens, asAdmin):
     builder = InlineKeyboardBuilder()
     for room_iden in rooms_idens:
         builder.button(
-            text=f"{room_iden[:-4]}:{room_iden[-4:]}",
+            text=room_iden,
             callback_data=states.CallbackFactory(
                 action=CallbackAction.SHOW_ROOM, room_iden=room_iden, asAdmin=asAdmin
             ).pack(),

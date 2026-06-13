@@ -56,7 +56,7 @@ async def create_room(msg: Message, state: FSMContext, room_client: RoomClient):
         return
 
     try:
-        room_id = await room_client.http_create_room(room_name, msg.from_user.id)
+        room_iden = await room_client.http_create_room(room_name, msg.from_user.id)
     except InvalidRoomNameException:
         await msg.answer(
             messages.invalid_room_name(),
@@ -68,9 +68,9 @@ async def create_room(msg: Message, state: FSMContext, room_client: RoomClient):
         return
 
     await state.clear()
-    kb = await room_admin_kb.room_admin_kb(f"{room_name}{room_id}")
+    kb = await room_admin_kb.room_admin_kb(f"{room_iden}")
     await set_reaction(msg)
     await msg.answer(
-        messages.room_created(room_name, room_id),
+        messages.room_created(room_name, room_iden),
         reply_markup=kb,
     )

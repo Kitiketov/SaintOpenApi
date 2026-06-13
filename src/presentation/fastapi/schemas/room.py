@@ -19,3 +19,9 @@ class RoomSettingsResponse(BaseModel):
     price: str | None
     event_time: str | None
     exchange_type: str | None
+
+class ConnectResponse(BaseModel):
+    status: bool
+
+class ConnectPayload(BaseModel):
+    room_iden: str
