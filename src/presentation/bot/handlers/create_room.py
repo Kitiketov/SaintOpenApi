@@ -2,8 +2,9 @@ from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
+from core.exceptions import TooManyRoomsException, InvalidRoomNameException
 from core.schemas.user import User
-from infrastructure.api_client.exceptions import APITooManyRooms, APIError, APIInvalidRoomName
+from infrastructure.api_client.exceptions import APIError
 from infrastructure.api_client.room_client import RoomClient
 from presentation.bot.handlers.common import set_reaction
 from presentation.bot.keyboards import common_kb, room_admin_kb
@@ -12,7 +13,6 @@ from presentation.bot.texts import messages
 from presentation.bot.texts.callback_actions import CallbackAction
 
 router = Router(name=__name__)
-
 
 @router.callback_query(CallbackFactory.filter(F.action == CallbackAction.CREATE_ROOM))
 async def start_create_room(
@@ -29,7 +29,7 @@ async def start_create_room(
 
     try:
         await room_client.http_prepare_room(user)
-    except APITooManyRooms:
+    except TooManyRoomsException:
         await call.message.answer(
             messages.too_many_rooms(),
             reply_markup=await common_kb.cancel_kb("None", False),
@@ -57,7 +57,7 @@ async def create_room(msg: Message, state: FSMContext, room_client: RoomClient):
 
     try:
         room_id = await room_client.http_create_room(room_name, msg.from_user.id)
-    except APIInvalidRoomName:
+    except InvalidRoomNameException:
         await msg.answer(
             messages.invalid_room_name(),
             reply_markup=await common_kb.cancel_kb("None", False),

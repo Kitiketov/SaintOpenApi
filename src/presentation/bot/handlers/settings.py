@@ -3,11 +3,14 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
 from src.db import db
-from src.keyboards import common_kb, settings_kb
-from src.states.states import CallbackFactory, Gen
-from src.texts import messages, settings_texts
-from src.texts.callback_actions import CallbackAction
-from src.utilities import validators
+
+from core.exceptions import RoomNotExistException, UserNotAdminException, MemberNotExistException
+from infrastructure.api_client.room_client import RoomClient
+from legacy.saint.src.utilities import validators
+from presentation.bot.keyboards import settings_kb, common_kb
+from presentation.bot.states.states import CallbackFactory, Gen
+from presentation.bot.texts import settings_texts, messages
+from presentation.bot.texts.callback_actions import CallbackAction
 
 router = Router(name=__name__)
 
@@ -32,52 +35,64 @@ async def check_room_access(user_id, room_iden):
 
 
 @router.callback_query(CallbackFactory.filter(F.action == CallbackAction.EDIT_ROOM_SETTINGS))
-async def show_room_settings(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
-    access, room_name = await check_room_access(call.from_user.id, callback_data.room_iden)
+async def show_room_settings(
+        call: CallbackQuery,
+        callback_data: CallbackFactory,
+        state: FSMContext,
+        room_client: RoomClient):
 
-    if access == "ROOM NOT EXISTS":
+    try:
+        room_name, price, event_time, exchange_type = await room_client.http_get_room_settings(callback_data.room_iden, call.from_user.id, True)
+
+        info = settings_texts.room_settings_info(room_name, price, event_time, exchange_type)
+        kb = await settings_kb.settings_view_kb(callback_data.room_iden, callback_data.asAdmin)
+        await call.message.answer(info, reply_markup=kb)
+
+    except RoomNotExistException as e:
         await call.message.edit_text(
-            messages.room_not_exists(room_name),
+            messages.room_not_exists(e.room_name),
+            reply_markup=await common_kb.ok_kb("None", asAdmin=False),
+        )
+        return
+    except UserNotAdminException as e:
+        await call.message.edit_text(
+            messages.not_a_member(e.room_name),
             reply_markup=await common_kb.ok_kb("None", asAdmin=False),
         )
         return
 
-    if access == "NOT ADMIN":
-        await call.message.edit_text(
-            messages.not_a_member(room_name),
-            reply_markup=await common_kb.ok_kb("None", asAdmin=False),
-        )
-        return
-
-    _, price, event_time, exchange_type = await db.get_room_settings(callback_data.room_iden)
-    info = settings_texts.room_settings_info(room_name, price, event_time, exchange_type)
-    kb = await settings_kb.settings_view_kb(callback_data.room_iden, callback_data.asAdmin)
-    await call.message.answer(info, reply_markup=kb)
 
 
 @router.callback_query(CallbackFactory.filter(F.action == CallbackAction.SHOW_ROOM_SETTINGS))
-async def show_room_settings_member(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
-    status = await db.check_room_and_member(call.from_user.id, callback_data.room_iden)
-    room_name = await get_room_name(callback_data.room_iden)
+async def show_room_settings_member(
+        call: CallbackQuery,
+        callback_data: CallbackFactory,
+        state: FSMContext,
+        room_client: RoomClient):
 
-    if status == "ROOM NOT EXISTS":
+    try:
+        room_name, price, event_time, exchange_type = await room_client.http_get_room_settings(
+            room_iden=callback_data.room_iden,
+            user_id=call.from_user.id,
+            require_admin=False
+        )
+        info = settings_texts.room_settings_info(room_name, price, event_time, exchange_type)
+        kb = await settings_kb.settings_view_kb(callback_data.room_iden, callback_data.asAdmin)
+        await call.message.answer(info, reply_markup=kb)
+
+    except RoomNotExistException as e:
         await call.message.edit_text(
-            messages.room_not_exists(room_name),
+            messages.room_not_exists(e.room_name),
             reply_markup=await common_kb.ok_kb("None", asAdmin=False),
         )
         return
 
-    if status == "MEMBER NOT EXISTS":
+    except MemberNotExistException as e:
         await call.message.edit_text(
-            messages.not_a_member(room_name),
+            messages.not_a_member(e.room_name),
             reply_markup=await common_kb.ok_kb("None", asAdmin=False),
         )
         return
-
-    _, price, event_time, exchange_type = await db.get_room_settings(callback_data.room_iden)
-    info = settings_texts.room_settings_info(room_name, price, event_time, exchange_type)
-    kb = await settings_kb.settings_view_kb(callback_data.room_iden, callback_data.asAdmin)
-    await call.message.answer(info, reply_markup=kb)
 
 
 @router.callback_query(CallbackFactory.filter(F.action == CallbackAction.OPEN_ROOM_SETTINGS_EDIT))
