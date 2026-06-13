@@ -3,13 +3,3 @@ class APIError(Exception):
         self.status_code = status_code
         self.detail = detail
         super().__init__(self.detail)
-
-
-class APITooManyRooms(APIError):
-    def __init__(self):
-        super().__init__(400, "Too many rooms")
-
-
-class APIInvalidRoomName(APIError):
-    def __init__(self):
-        super().__init__(422, "Invalid room name")
