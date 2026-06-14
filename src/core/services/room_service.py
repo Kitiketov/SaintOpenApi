@@ -51,13 +51,11 @@ class RoomService(IRoomService):
 
         if status == "ROOM NOT EXISTS":
             raise RoomNotExistException(room_iden)
-
-        if require_admin:
+        elif require_admin:
             admin_id = await self.repo.get_room_admin(room_iden)
             if admin_id != user_id:
                 raise UserNotAdminException(room_iden)
-        else:
-            if status == "MEMBER NOT EXISTS":
+        elif status == "MEMBER NOT EXISTS":
                 raise MemberNotExistException(room_iden)
 
         _, price, event_time, exchange_type = await self.repo.get_room_settings(room_iden)
