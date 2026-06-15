@@ -1,3 +1,5 @@
+from typing import Any
+
 import httpx
 
 from core.exceptions import InvalidRoomNameException, TooManyRoomsException, RoomNotExistException, \
@@ -5,56 +7,58 @@ from core.exceptions import InvalidRoomNameException, TooManyRoomsException, Roo
 from core.schemas.user import User
 from infrastructure.api_client.exceptions import APIError
 
+ERROR_MAP = {
+    "TOO_MANY_ROOMS": lambda _: TooManyRoomsException(),
+    "INVALID_ROOM_NAME": lambda _: InvalidRoomNameException(),
+
+    "ROOM_NOT_EXISTS": lambda d: RoomNotExistException(d.get("room_name")),
+    "MEMBER_NOT_EXISTS": lambda d: MemberNotExistException(d.get("room_name")),
+    "USER_NOT_ADMIN": lambda d: UserNotAdminException(d.get("room_name")),
+}
 
 class RoomClient:
     def __init__(self, client: httpx.AsyncClient):
         self.client = client
 
-    async def http_prepare_room(self, user: User) -> None:
-        response = await self.client.post("/rooms/prepare", json={"user": user.model_dump()})
-
-        if response.status_code == 400:
-            raise TooManyRoomsException()
+    async def _request(self, method: str, url: str, **kwargs) -> dict:
+        response = await self.client.request(method, url, **kwargs)
 
         try:
-            response.raise_for_status()
-        except httpx.HTTPStatusError as e:
-            raise APIError(response.status_code, str(e)) from e
+            data = response.json()
+        except Exception:
+            data = {}
+
+        print("\n--- DEBUG RESPONSE ---")
+        print("STATUS:", response.status_code)
+        print("DATA:", data)
+        print("DETAIL:", data.get("detail"))
+        print("----------------------\n")
+
+        if response.is_success:
+            return data
+
+        detail = data.get("detail")
+        handler = ERROR_MAP.get(detail)
+
+        if handler:
+            raise handler(data)
+
+        raise APIError(response.status_code, data)
+
+    async def http_validate_room_creation(self, user: User) -> None:
+        await self._request("POST", "/rooms/prepare", json={"user": user.model_dump()})
 
     async def http_create_room(self, room_name: str, user_id: int) -> str:
-        response = await self.client.post("/rooms/create", json={"room_name": room_name, "user_id": user_id})
+        data = await self._request("POST", "/rooms/create", json={"room_name": room_name, "user_id": user_id})
 
-        if response.status_code == 422:
-            raise InvalidRoomNameException()
-
-        try:
-            response.raise_for_status()
-        except httpx.HTTPStatusError as e:
-            raise APIError(response.status_code, str(e)) from e
-        return response.json()["room_iden"]
+        return data["room_iden"]
 
     async def http_get_room_settings(self, room_iden: str, user_id: int, require_admin: bool) -> tuple[str | bool, str | None, str | None, str | None]:
-        response = await self.client.get(
-            f"/rooms/{room_iden}/settings",
-            params={"user_id": user_id, "require_admin": require_admin}
-        )
+        data = await self._request("GET", f"/rooms/{room_iden}/settings", params={"user_id": user_id, "require_admin": require_admin})
 
-        if response.status_code in (403, 404):
-            error_data = response.json()
-            error_detail = error_data.get("detail")
-            room_name = error_data.get("room_name", "Неизвестная комната")
-
-            if error_detail == "ROOM_NOT_EXISTS":
-                raise RoomNotExistException(room_name=room_name)
-            elif error_detail == "USER_NOT_ADMIN":
-                raise UserNotAdminException(room_name=room_name)
-            elif error_detail == "MEMBER_NOT_EXISTS":
-                raise MemberNotExistException(room_name=room_name)
-
-        try:
-            response.raise_for_status()
-        except httpx.HTTPStatusError as e:
-            raise APIError(response.status_code, str(e)) from e
-
-        data = response.json()
         return data["room_name"], data["price"], data["event_time"], data["exchange_type"]
+
+    async def http_get_room_members(self, room_iden: str, user_id: int) -> tuple[list, Any]:
+        data = await self._request("GET", f"/rooms/{room_iden}/members", params={"user_id": user_id})
+
+        return data["member_list"], data["admin"]

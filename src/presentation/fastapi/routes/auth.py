@@ -8,7 +8,7 @@ router = APIRouter()
 
 
 @router.get("/login")
-async def api_login(
+async def login(
         response: Response,
         payload: TelegramLoginPayload = Depends(),
         security: AuthX = Depends(get_service(AuthX))

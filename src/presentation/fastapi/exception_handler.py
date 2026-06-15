@@ -3,8 +3,11 @@ from fastapi.responses import JSONResponse
 
 from core.exceptions import TooManyRoomsException, InvalidRoomNameException, RoomNotExistException, \
     MemberNotExistException, UserNotAdminException, JoinTooLateException,UserAlreadyExistException
+from infrastructure.api_client.exceptions import APIError
 
 
+async def base_exception_handler(request: Request, exc: APIError) -> JSONResponse:
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
 async def too_many_rooms_handler(request: Request, exc: TooManyRoomsException):
     return JSONResponse(status_code=400, content={"detail": "Too many rooms"})
 

@@ -10,7 +10,8 @@ from config.settings import Settings
 class SqliteSaintRepository(ISaintRepository):
     def __init__(self, settings: Settings):
         self.settings = settings
-        self.conn = sqlite3.connect(settings.db_path, check_same_thread=False)
+        self.conn = sqlite3.connect(settings.db_path,  check_same_thread=False)
+        self.conn.row_factory = sqlite3.Row
 
     def _is_valid_name(self, name: str) -> bool:
         forbidden = [

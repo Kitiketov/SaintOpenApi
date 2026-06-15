@@ -25,3 +25,7 @@ class ConnectResponse(BaseModel):
 
 class ConnectPayload(BaseModel):
     room_iden: str
+
+class GetRoomMembersResponse(BaseModel):
+    member_list: list[User]
+    admin: User

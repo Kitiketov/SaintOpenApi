@@ -28,7 +28,7 @@ async def start_create_room(
     )
 
     try:
-        await room_client.http_prepare_room(user)
+        await room_client.http_validate_room_creation(user)
     except TooManyRoomsException:
         await call.message.answer(
             messages.too_many_rooms(),
