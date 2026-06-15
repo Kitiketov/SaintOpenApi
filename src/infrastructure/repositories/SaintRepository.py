@@ -10,7 +10,7 @@ from config.settings import Settings
 class SqliteSaintRepository(ISaintRepository):
     def __init__(self, settings: Settings):
         self.settings = settings
-        self.conn = sqlite3.connect(settings.db_path,  check_same_thread=False)
+        self.conn = sqlite3.connect(settings.db_path, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
 
     def _is_valid_name(self, name: str) -> bool:
@@ -87,7 +87,9 @@ class SqliteSaintRepository(ISaintRepository):
 
             cur.execute("INSERT INTO rooms (room_iden, admin) VALUES (?, ?)", (room_iden, user_id))
             cur.execute(f"CREATE TABLE [{room_iden}_mem] (user_id INTEGER PRIMARY KEY, wishes TEXT, photo_id TEXT)")
-            cur.execute(f"CREATE TABLE [{room_iden}_saint] (saint_user_id INTEGER PRIMARY KEY, reciver_user_id INTEGER)")
+            cur.execute(
+                f"CREATE TABLE [{room_iden}_saint] (saint_user_id INTEGER PRIMARY KEY, reciver_user_id INTEGER)"
+            )
             cur.execute("INSERT OR IGNORE INTO user_rooms (tg_id, room_iden) VALUES (?, ?)", (user_id, room_iden))
             cur.execute("UPDATE user_rooms SET is_admin = TRUE WHERE tg_id = ? AND room_iden = ?", (user_id, room_iden))
             self.conn.commit()
@@ -289,7 +291,9 @@ class SqliteSaintRepository(ISaintRepository):
             cur = self.conn.cursor()
             if not cur.execute("SELECT 1 FROM rooms WHERE room_iden = ?", (room_iden,)).fetchone():
                 return "ROOM NOT EXISTS", None, None
-            user = cur.execute(f"SELECT wishes, photo_id FROM [{room_iden}_mem] WHERE user_id = ?", (user_id,)).fetchone()
+            user = cur.execute(
+                f"SELECT wishes, photo_id FROM [{room_iden}_mem] WHERE user_id = ?", (user_id,)
+            ).fetchone()
             if not user:
                 return "MEMBER NOT EXISTS", None, None
             return True, user[0], user[1]

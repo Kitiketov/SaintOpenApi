@@ -9,8 +9,8 @@ router = APIRouter()
 
 @router.get("/", response_class=HTMLResponse)
 async def login_page(
-        request: Request,
-        settings: Settings = Depends(get_service(Settings)),
+    request: Request,
+    settings: Settings = Depends(get_service(Settings)),
 ) -> HTMLResponse:
     return request.app.state.templates.TemplateResponse(
         request=request,

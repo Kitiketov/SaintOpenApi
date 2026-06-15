@@ -13,7 +13,6 @@ from presentation.bot.texts.callback_actions import CallbackAction
 router = Router(name=__name__)
 
 
-
 async def check_room_access(user_id, room_iden):
     status = await db.check_room_and_member(user_id, room_iden)
     if status == "ROOM NOT EXISTS":
@@ -30,13 +29,13 @@ async def check_room_access(user_id, room_iden):
 
 @router.callback_query(CallbackFactory.filter(F.action == CallbackAction.EDIT_ROOM_SETTINGS))
 async def show_room_settings(
-        call: CallbackQuery,
-        callback_data: CallbackFactory,
-        state: FSMContext,
-        room_client: RoomClient):
+    call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext, room_client: RoomClient
+):
 
     try:
-        room_name, price, event_time, exchange_type = await room_client.http_get_room_settings(callback_data.room_iden, call.from_user.id, True)
+        room_name, price, event_time, exchange_type = await room_client.http_get_room_settings(
+            callback_data.room_iden, call.from_user.id, True
+        )
 
         info = settings_texts.room_settings_info(room_name, price, event_time, exchange_type)
         kb = await settings_kb.settings_view_kb(callback_data.room_iden, callback_data.asAdmin)
@@ -56,19 +55,14 @@ async def show_room_settings(
         return
 
 
-
 @router.callback_query(CallbackFactory.filter(F.action == CallbackAction.SHOW_ROOM_SETTINGS))
 async def show_room_settings_member(
-        call: CallbackQuery,
-        callback_data: CallbackFactory,
-        state: FSMContext,
-        room_client: RoomClient):
+    call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext, room_client: RoomClient
+):
 
     try:
         room_name, price, event_time, exchange_type = await room_client.http_get_room_settings(
-            room_iden=callback_data.room_iden,
-            user_id=call.from_user.id,
-            require_admin=False
+            room_iden=callback_data.room_iden, user_id=call.from_user.id, require_admin=False
         )
         info = settings_texts.room_settings_info(room_name, price, event_time, exchange_type)
         kb = await settings_kb.settings_view_kb(callback_data.room_iden, callback_data.asAdmin)

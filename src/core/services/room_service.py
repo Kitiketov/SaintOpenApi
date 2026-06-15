@@ -1,8 +1,15 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from core.exceptions import TooManyRoomsException, InvalidRoomNameException, RoomNotExistException, \
-    UserNotAdminException, MemberNotExistException, UserAlreadyExistException, JoinTooLateException
+from core.exceptions import (
+    TooManyRoomsException,
+    InvalidRoomNameException,
+    RoomNotExistException,
+    UserNotAdminException,
+    MemberNotExistException,
+    UserAlreadyExistException,
+    JoinTooLateException,
+)
 from core.schemas.user import User
 from infrastructure.repositories.interfaces.ISaintRepository import ISaintRepository
 from presentation.fastapi.schemas.room import ConnectResponse
@@ -18,7 +25,9 @@ class IRoomService(ABC):
         pass
 
     @abstractmethod
-    async def get_room_settings(self, room_iden: str, user_id: int, require_admin: bool) -> tuple[str | bool, str | None, str | None, str | None]:
+    async def get_room_settings(
+        self, room_iden: str, user_id: int, require_admin: bool
+    ) -> tuple[str | bool, str | None, str | None, str | None]:
         pass
 
     async def connect_room(self, room_ident: str, user_id) -> bool:
@@ -39,7 +48,7 @@ class RoomService(IRoomService):
         if room_count > 5:
             raise TooManyRoomsException()
 
-        #todo: вынести эту логику в логин?
+        # todo: вынести эту логику в логин?
         await self.repo.add_user(user)
 
     async def create_new_room(self, room_name: str, user_id: int) -> str:
@@ -50,8 +59,9 @@ class RoomService(IRoomService):
 
         return room_id
 
-
-    async def get_room_settings(self, room_iden: str, user_id: int, require_admin: bool) -> tuple[str | bool, str | None, str | None, str | None]:
+    async def get_room_settings(
+        self, room_iden: str, user_id: int, require_admin: bool
+    ) -> tuple[str | bool, str | None, str | None, str | None]:
         status = await self.repo.check_room_and_member(user_id, room_iden)
 
         if status == "ROOM NOT EXISTS":
@@ -62,12 +72,12 @@ class RoomService(IRoomService):
             if admin_id != user_id:
                 raise UserNotAdminException(room_iden)
         elif status == "MEMBER NOT EXISTS":
-                raise MemberNotExistException(room_iden)
+            raise MemberNotExistException(room_iden)
 
         _, price, event_time, exchange_type = await self.repo.get_room_settings(room_iden)
         return room_iden, price, event_time, exchange_type
 
-    async def connect_room(self,room_iden: str, user_id) -> bool:
+    async def connect_room(self, room_iden: str, user_id) -> bool:
         room_status = await self.repo.connect_to_room(room_iden, user_id)
         if room_status == "room_error":
             raise RoomNotExistException(room_iden)

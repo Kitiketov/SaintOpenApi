@@ -14,6 +14,7 @@ from presentation.bot.texts.callback_actions import CallbackAction
 
 router = Router(name=__name__)
 
+
 @router.callback_query(CallbackFactory.filter(F.action == CallbackAction.CREATE_ROOM))
 async def start_create_room(
     call: CallbackQuery,

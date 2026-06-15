@@ -2,10 +2,10 @@ import httpx
 
 from infrastructure.api_client.exceptions import APIError
 
-
 ERROR_MAP = {
     # "TOO_MANY_ROOMS": lambda _: TooManyRoomsException(),
 }
+
 
 class UserClient:
     def __init__(self, client: httpx.AsyncClient):

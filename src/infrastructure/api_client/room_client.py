@@ -2,19 +2,24 @@ from typing import Any
 
 import httpx
 
-from core.exceptions import InvalidRoomNameException, TooManyRoomsException, RoomNotExistException, \
-    UserNotAdminException, MemberNotExistException
+from core.exceptions import (
+    InvalidRoomNameException,
+    TooManyRoomsException,
+    RoomNotExistException,
+    UserNotAdminException,
+    MemberNotExistException,
+)
 from core.schemas.user import User
 from infrastructure.api_client.exceptions import APIError
 
 ERROR_MAP = {
     "TOO_MANY_ROOMS": lambda _: TooManyRoomsException(),
     "INVALID_ROOM_NAME": lambda _: InvalidRoomNameException(),
-
     "ROOM_NOT_EXISTS": lambda d: RoomNotExistException(d.get("room_name")),
     "MEMBER_NOT_EXISTS": lambda d: MemberNotExistException(d.get("room_name")),
     "USER_NOT_ADMIN": lambda d: UserNotAdminException(d.get("room_name")),
 }
+
 
 class RoomClient:
     def __init__(self, client: httpx.AsyncClient):
@@ -53,8 +58,12 @@ class RoomClient:
 
         return data["room_iden"]
 
-    async def http_get_room_settings(self, room_iden: str, user_id: int, require_admin: bool) -> tuple[str | bool, str | None, str | None, str | None]:
-        data = await self._request("GET", f"/rooms/{room_iden}/settings", params={"user_id": user_id, "require_admin": require_admin})
+    async def http_get_room_settings(
+        self, room_iden: str, user_id: int, require_admin: bool
+    ) -> tuple[str | bool, str | None, str | None, str | None]:
+        data = await self._request(
+            "GET", f"/rooms/{room_iden}/settings", params={"user_id": user_id, "require_admin": require_admin}
+        )
 
         return data["room_name"], data["price"], data["event_time"], data["exchange_type"]
 

@@ -13,7 +13,7 @@ router = APIRouter()
 async def get_rooms(
     as_admin: bool | None = None,
     current_user: User = Depends(get_current_user),
-    user_service: IUserService = Depends(get_service(IUserService))
+    user_service: IUserService = Depends(get_service(IUserService)),
 ) -> GetRoomsResponse:
     rooms = await user_service.get_rooms(current_user.id, as_admin)
     return GetRoomsResponse(rooms=rooms)

@@ -1,10 +1,20 @@
 from fastapi import FastAPI
 
 from di.container import Container
-from core.exceptions import TooManyRoomsException, InvalidRoomNameException, RoomNotExistException, \
-    MemberNotExistException, UserNotAdminException
-from presentation.fastapi.exception_handler import too_many_rooms_handler, invalid_room_name_handler, \
-    room_not_exists_handler, member_not_exists_handler, user_not_admin_handler
+from core.exceptions import (
+    TooManyRoomsException,
+    InvalidRoomNameException,
+    RoomNotExistException,
+    MemberNotExistException,
+    UserNotAdminException,
+)
+from presentation.fastapi.exception_handler import (
+    too_many_rooms_handler,
+    invalid_room_name_handler,
+    room_not_exists_handler,
+    member_not_exists_handler,
+    user_not_admin_handler,
+)
 from presentation.fastapi.routes.example import router as example_router
 from presentation.fastapi.routes.room import router as room_router
 from presentation.fastapi.routes.auth import router as auth_router
