@@ -1,5 +1,4 @@
-from datetime import datetime, timezone
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl
+from pydantic import BaseModel, HttpUrl
 
 
 class TelegramLoginPayload(BaseModel):
@@ -10,6 +9,7 @@ class TelegramLoginPayload(BaseModel):
     photo_url: HttpUrl | None = None
     auth_date: int
     hash: str
+
 
 class TelegramLoginResponse(BaseModel):
     access_token: str

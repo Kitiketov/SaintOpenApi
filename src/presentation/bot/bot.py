@@ -22,11 +22,7 @@ async def run_bot(token: str, container: Container) -> None:
     dp.message.middleware(UpdateUserMiddleware(saint_repo))
     dp.callback_query.middleware(UpdateUserMiddleware(saint_repo))
 
-    dp.include_routers(
-        create_room.router,
-        settings.router,
-        legacy_route.router
-    )
+    dp.include_routers(create_room.router, settings.router, legacy_route.router)
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)

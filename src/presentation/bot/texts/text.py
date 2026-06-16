@@ -10,7 +10,7 @@ async def create_user_info(user):
 
 
 async def create_member_list(raw_list, admin, room_iden):
-    member_list = f"Участники группы {room_iden[:-4]}:{room_iden[-4:]}\n\n"
+    member_list = f"Участники группы {room_iden}\n\n"
     member_list += "Админ " + await create_user_info(admin)
     i = 1
     for member in raw_list:

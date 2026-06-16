@@ -8,10 +8,8 @@ router = APIRouter()
 
 
 @router.get("/login")
-async def api_login(
-        response: Response,
-        payload: TelegramLoginPayload = Depends(),
-        security: AuthX = Depends(get_service(AuthX))
+async def login(
+    response: Response, payload: TelegramLoginPayload = Depends(), security: AuthX = Depends(get_service(AuthX))
 ) -> TelegramLoginResponse:
     # TODO тут бы проверить что это норм hash (но сон пока важнее)
     token = security.create_access_token(uid=str(payload.id))
