@@ -11,6 +11,7 @@ from core.exceptions import (
 )
 from core.schemas.user import User
 from infrastructure.api_client.exceptions import APIError
+from presentation.fastapi.schemas.room import AccessResponse
 
 ERROR_MAP = {
     "TOO_MANY_ROOMS": lambda _: TooManyRoomsException(),
@@ -71,3 +72,8 @@ class RoomClient:
         data = await self._request("GET", f"/rooms/{room_iden}/members", params={"user_id": user_id})
 
         return data["member_list"], data["admin"]
+
+    async def http_get_room_access(self, room_iden: str, room_name: str) -> bool:
+        data = await self._request("GET", f"/rooms/{room_iden}/access/{room_name}")
+
+        return data["access"]

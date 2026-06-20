@@ -66,17 +66,17 @@ async def start_handler(msg: Message):
 @router.callback_query(CallbackFactory.filter(F.action == CallbackAction.REFRESH_LIST))
 @router.callback_query(CallbackFactory.filter(F.action == CallbackAction.MEMBERS_LIST))
 async def get_member_list(call: CallbackQuery, callback_data: CallbackFactory):
-    isMemberOrAdmin = await db.check_room_and_member(call.from_user.id, callback_data.room_iden)
+    is_member_or_admin = await db.check_room_and_member(call.from_user.id, callback_data.room_iden)
     room_name = await get_room_name(callback_data.room_iden)
 
-    if isMemberOrAdmin == "MEMBER NOT EXISTS":
+    if is_member_or_admin == "MEMBER NOT EXISTS":
         await call.message.edit_text(
             messages.not_a_member(room_name),
             reply_markup=await common_kb.ok_kb("None", asAdmin=False),
         )
         return
 
-    elif isMemberOrAdmin == "ROOM NOT EXISTS":
+    elif is_member_or_admin == "ROOM NOT EXISTS":
         await call.message.edit_text(
             messages.room_not_exists(room_name),
             reply_markup=await common_kb.ok_kb("None", asAdmin=False),
@@ -86,8 +86,8 @@ async def get_member_list(call: CallbackQuery, callback_data: CallbackFactory):
     if callback_data.action == CallbackAction.REFRESH_LIST:
         await call.bot.delete_message(call.from_user.id, call.message.message_id)
 
-    member_list, admin, isAdminMember = await db.get_members_list(callback_data.room_iden)
-    if isAdminMember:
+    member_list, admin, is_admin_member = await db.get_members_list(callback_data.room_iden)
+    if is_admin_member:
         member_list.append(admin)
     ans = await text.create_member_list(member_list, admin, callback_data.room_iden)
     await call.message.answer(
@@ -125,10 +125,10 @@ async def get_my_admin_rooms(
 
 @router.callback_query(CallbackFactory.filter(F.action == CallbackAction.SHOW_ROOM))
 async def show_room(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
-    isMemberOrAdmin = await db.check_room_and_member(call.from_user.id, callback_data.room_iden)
+    is_member_or_admin = await db.check_room_and_member(call.from_user.id, callback_data.room_iden)
     room_name = await get_room_name(callback_data.room_iden)
 
-    if isMemberOrAdmin == "ROOM NOT EXISTS":
+    if is_member_or_admin == "ROOM NOT EXISTS":
         await call.message.edit_text(
             messages.room_not_exists(room_name),
             reply_markup=await common_kb.ok_kb("None", asAdmin=False),
@@ -142,7 +142,9 @@ async def show_room(call: CallbackQuery, callback_data: CallbackFactory, state: 
         )
         return
 
-    if isMemberOrAdmin == "MEMBER NOT EXISTS" or (callback_data.asAdmin == False and isMemberOrAdmin == "IS ADMIN"):
+    if is_member_or_admin == "MEMBER NOT EXISTS" or (
+        callback_data.asAdmin == False and is_member_or_admin == "IS ADMIN"
+    ):
         await call.message.edit_text(
             messages.not_a_member(room_name),
             reply_markup=await common_kb.ok_kb("None", asAdmin=False),

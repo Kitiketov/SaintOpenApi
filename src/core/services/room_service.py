@@ -12,10 +12,17 @@ from core.exceptions import (
 )
 from core.schemas.user import User
 from infrastructure.repositories.interfaces.ISaintRepository import ISaintRepository
-from presentation.fastapi.schemas.room import ConnectResponse
 
 
 class IRoomService(ABC):
+    @abstractmethod
+    async def validate_member_access(
+        self,
+        room_iden: str,
+        user_id: int,
+    ) -> None:
+        pass
+
     @abstractmethod
     async def validate_room_creation(self, user: User) -> None:
         pass
@@ -41,6 +48,22 @@ class IRoomService(ABC):
 class RoomService(IRoomService):
     def __init__(self, repo: ISaintRepository):
         self.repo = repo
+
+    async def validate_member_access(
+        self,
+        room_iden: str,
+        user_id: int,
+    ) -> None:
+        status = await self.repo.check_room_and_member(
+            user_id,
+            room_iden,
+        )
+
+        if status == "ROOM NOT EXISTS":
+            raise RoomNotExistException(room_iden)
+
+        if status == "MEMBER NOT EXISTS":
+            raise MemberNotExistException(room_iden)
 
     async def validate_room_creation(self, user: User) -> None:
         room_count = await self.repo.count_user_room(user.id)
@@ -87,12 +110,7 @@ class RoomService(IRoomService):
         return True
 
     async def get_members(self, room_iden: str, user_id: int) -> tuple[list, Any]:
-        is_member_or_admin = await self.repo.check_room_and_member(user_id, room_iden)
-
-        if is_member_or_admin == "MEMBER NOT EXISTS":
-            raise MemberNotExistException(room_iden)
-        elif is_member_or_admin == "ROOM NOT EXISTS":
-            raise RoomNotExistException(room_iden)
+        await self.validate_member_access(room_iden, user_id)
 
         member_list, admin, is_admin_member = await self.repo.get_members_list(room_iden)
 

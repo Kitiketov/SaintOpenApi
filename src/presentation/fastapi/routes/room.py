@@ -11,6 +11,7 @@ from presentation.fastapi.schemas.room import (
     RoomSettingsResponse,
     ConnectResponse,
     GetRoomMembersResponse,
+    AccessResponse,
 )
 
 router = APIRouter()
@@ -76,3 +77,14 @@ async def get_room_members(
         member_list=member_list,
         admin=admin,
     )
+
+
+@router.get("/{room_iden}/access")
+async def get_room_access(
+    room_iden: str,
+    current_user: User = Depends(get_current_user),
+    room_service: IRoomService = Depends(get_service(IRoomService)),
+) -> AccessResponse:
+
+    await room_service.validate_member_access(room_iden, current_user.id)
+    return AccessResponse(status=True)

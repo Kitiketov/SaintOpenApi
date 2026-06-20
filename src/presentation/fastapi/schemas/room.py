@@ -33,3 +33,7 @@ class ConnectPayload(BaseModel):
 class GetRoomMembersResponse(BaseModel):
     member_list: list[User]
     admin: User
+
+
+class AccessResponse(BaseModel):
+    status: bool
