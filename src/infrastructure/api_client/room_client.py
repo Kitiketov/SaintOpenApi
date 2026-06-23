@@ -61,9 +61,7 @@ class RoomClient:
     async def http_get_room_settings(
         self, room_iden: str, require_admin: bool
     ) -> tuple[str | bool, str | None, str | None, str | None]:
-        data = await self._request(
-            "GET", f"/rooms/{room_iden}/settings", params={"require_admin": require_admin}
-        )
+        data = await self._request("GET", f"/rooms/{room_iden}/settings", params={"require_admin": require_admin})
 
         return data["room_name"], data["price"], data["event_time"], data["exchange_type"]
 
