@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 
 from core.schemas.user import User
+from core.enums.RoomAccessStatus import RoomAccessStatus
 
 
 class CreatePayload(BaseModel):
@@ -36,4 +37,9 @@ class GetRoomMembersResponse(BaseModel):
 
 
 class AccessResponse(BaseModel):
-    status: bool
+    status: RoomAccessStatus
+
+
+class WishlistResponse(BaseModel):
+    wishes: str | None
+    photo_id: str | None = None

@@ -31,6 +31,6 @@ class UserClient:
         raise APIError(response.status_code, data)
 
     async def http_get_rooms(self, as_admin: bool | None = None) -> dict[str, list[str]]:
-        data = await self._request("GET", f"users/me/rooms", params={"as_admin": as_admin})
+        data = await self._request("GET", "users/me/rooms", params={"as_admin": as_admin})
 
         return data["rooms"]

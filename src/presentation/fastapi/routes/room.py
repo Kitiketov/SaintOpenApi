@@ -12,6 +12,7 @@ from presentation.fastapi.schemas.room import (
     ConnectResponse,
     GetRoomMembersResponse,
     AccessResponse,
+    WishlistResponse,
 )
 
 router = APIRouter()
@@ -86,5 +87,42 @@ async def get_room_access(
     room_service: IRoomService = Depends(get_service(IRoomService)),
 ) -> AccessResponse:
 
-    await room_service.validate_member_access(room_iden, current_user.id)
-    return AccessResponse(status=True)
+    status = await room_service.validate_member_access(room_iden, current_user.id)
+    return AccessResponse(status=status)
+
+
+# todo: они одинаковые, но как бы логика разная, я пока не знаю, можно ли и стоит ли в одно это совмещать
+@router.get("/{room_iden}/wishlist")
+async def get_my_wishes(
+    room_iden: str,
+    current_user: User = Depends(get_current_user),
+    room_service: IRoomService = Depends(get_service(IRoomService)),
+) -> WishlistResponse:
+
+    wishes, photo_id = await room_service.get_member_wishes(room_iden, current_user.id)
+
+    return WishlistResponse(wishes=wishes, photo_id=photo_id)
+
+
+@router.get("/{room_iden}/recipient/wishlist")
+async def get_recipient_wishes(
+    room_iden: str,
+    current_user: User = Depends(get_current_user),
+    room_service: IRoomService = Depends(get_service(IRoomService)),
+) -> WishlistResponse:
+
+    wishes, photo_id = await room_service.get_recipient_wishes(room_iden, current_user.id)
+    return WishlistResponse(wishes=wishes, photo_id=photo_id)
+
+
+@router.put("/{room_iden}/wishlist")
+async def update_wishes(
+    room_iden: str,
+    wishes: str,
+    photo_id: str | None = None,
+    current_user: User = Depends(get_current_user),
+    room_service: IRoomService = Depends(get_service(IRoomService)),
+) -> WishlistResponse:
+
+    wishes = await room_service.update_wishes(room_iden, current_user.id, wishes, photo_id)
+    return WishlistResponse(wishes=wishes)
