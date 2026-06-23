@@ -18,7 +18,7 @@ router = Router(name=__name__)
 
 
 @router.callback_query(CallbackFactory.filter(F.action == CallbackAction.MY_WISHES))
-async def my_wishes(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
+async def my_wishes(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):  # текущее желание
     isMemberOrAdmin = await db.check_room_and_member(call.from_user.id, callback_data.room_iden)
 
     if isMemberOrAdmin == "ROOM NOT EXISTS":
@@ -38,11 +38,11 @@ async def my_wishes(call: CallbackQuery, callback_data: CallbackFactory, state: 
     await call.message.answer(wishes_info, reply_markup=kb)
 
 
-@router.callback_query(CallbackFactory.filter(F.action == CallbackAction.EDIT_WISHES))
+@router.callback_query(CallbackFactory.filter(F.action == CallbackAction.EDIT_WISHES))  # начало редактирования желания
 async def my_wishes(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
-    isMemberOrAdmin = await db.check_room_and_member(call.from_user.id, callback_data.room_iden)
+    is_member_or_admin = await db.check_room_and_member(call.from_user.id, callback_data.room_iden)
 
-    if isMemberOrAdmin == "ROOM NOT EXISTS":
+    if is_member_or_admin == "ROOM NOT EXISTS":
         room_name = await get_room_name(callback_data.room_iden)
         await call.message.edit_text(
             messages.room_not_exists(room_name),
@@ -50,7 +50,7 @@ async def my_wishes(call: CallbackQuery, callback_data: CallbackFactory, state: 
         )
         return
 
-    if isMemberOrAdmin != True:
+    if is_member_or_admin != True:
         await call.message.edit_text(
             messages.wish_not_member(),
             reply_markup=await common_kb.ok_kb("None", asAdmin=False),
@@ -82,7 +82,7 @@ async def my_wishes(call: CallbackQuery, callback_data: CallbackFactory, state: 
 
 
 @router.message(Gen.set_wishes)
-async def edit_wishes_room(msg: Message, state: FSMContext):
+async def edit_wishes_room(msg: Message, state: FSMContext):  # сохранение нового желания
     wishes_raw = msg.text or msg.caption or ""
 
     data = await state.get_data()
@@ -137,7 +137,9 @@ async def edit_wishes_room(msg: Message, state: FSMContext):
 
 
 @router.callback_query(CallbackFactory.filter(F.action == CallbackAction.SEE_WISHES))
-async def see_wishes(call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext):
+async def see_wishes(
+    call: CallbackQuery, callback_data: CallbackFactory, state: FSMContext
+):  # показать желание того, кому даришь
     isMemberOrAdmin = await db.check_room_and_member(call.from_user.id, callback_data.room_iden)
 
     if isMemberOrAdmin == "ROOM NOT EXISTS":

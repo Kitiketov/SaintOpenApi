@@ -53,21 +53,39 @@ class RoomClient:
     async def http_validate_room_creation(self, user: User) -> None:
         await self._request("POST", "/rooms/prepare", json={"user": user.model_dump()})
 
-    async def http_create_room(self, room_name: str, user_id: int) -> str:
-        data = await self._request("POST", "/rooms/create", json={"room_name": room_name, "user_id": user_id})
+    async def http_create_room(self, room_name: str) -> str:
+        data = await self._request("POST", "/rooms/create", json={"room_name": room_name})
 
         return data["room_iden"]
 
     async def http_get_room_settings(
-        self, room_iden: str, user_id: int, require_admin: bool
+        self, room_iden: str, require_admin: bool
     ) -> tuple[str | bool, str | None, str | None, str | None]:
-        data = await self._request(
-            "GET", f"/rooms/{room_iden}/settings", params={"user_id": user_id, "require_admin": require_admin}
-        )
+        data = await self._request("GET", f"/rooms/{room_iden}/settings", params={"require_admin": require_admin})
 
         return data["room_name"], data["price"], data["event_time"], data["exchange_type"]
 
-    async def http_get_room_members(self, room_iden: str, user_id: int) -> tuple[list, Any]:
-        data = await self._request("GET", f"/rooms/{room_iden}/members", params={"user_id": user_id})
+    async def http_get_room_members(self, room_iden: str) -> tuple[list, Any]:
+        data = await self._request("GET", f"/rooms/{room_iden}/members")
 
         return data["member_list"], data["admin"]
+
+    async def http_get_room_access(self, room_iden: str, room_name: str) -> bool:
+        data = await self._request("GET", f"/rooms/{room_iden}/access/{room_name}")
+
+        return data["access"]
+
+    async def http_get_my_wishes(self, room_iden: str) -> tuple[str | None, str | None]:
+        data = await self._request("GET", f"/rooms/{room_iden}/wishlist")
+
+        return data["wishes"], data["photo_id"]
+
+    async def http_get_recipient_wishes(self, room_iden: str) -> tuple[str | None, str | None]:
+        data = await self._request("GET", f"/rooms/{room_iden}/recipient/wishlist")
+
+        return data["wishes"], data["photo_id"]
+
+    async def http_update_wishes(self, room_iden: str) -> str:
+        data = await self._request("PUT", f"/rooms/{room_iden}/wishlist")
+
+        return data["wishes"]
